@@ -1,0 +1,285 @@
+GOWTHAM FIREWORKS — B2C, B2B AND PHONE OTP ARCHITECTURE
+========================================================
+
+Date approved: 24 July 2026
+Repository: mkraja826/Gowthamfireworks
+Status: APPROVED FOR PLANNING; NOT YET IMPLEMENTED
+
+1. BUSINESS MODEL
+-----------------
+The website will serve two customer channels from one catalogue and one owner admin panel:
+
+A. B2C — Factory to Customer
+- Retail customers browse the public catalogue.
+- Retail prices, retail pack sizes and customer availability are displayed.
+- A verified phone login is required before submitting an order request.
+- Customers can save addresses, review past requests and track status.
+
+B. B2B — Factory to Wholesaler
+- Wholesalers use the same phone OTP login.
+- A new user applies for a wholesale account.
+- The application includes business and licence details required by the owner.
+- The owner reviews and approves or rejects the application.
+- Only approved wholesale accounts can see wholesale prices, carton quantities, minimum quantities and wholesale-only products.
+- Wholesale pricing may be assigned by tier or directly to an account.
+
+2. COMPLIANCE-FIRST ORDERING RULE
+---------------------------------
+The application will technically support carts, order records, quotes, confirmations and status tracking.
+
+Production behaviour must remain configurable:
+- ENQUIRY_ONLY: customer submits an order/enquiry request; no online payment or completed online sale.
+- MANUAL_CONFIRMATION: owner verifies customer, licence where required, location, stock, transport and legal eligibility before confirming.
+- LICENSED_ORDERING: may only be enabled after the business obtains written legal/compliance confirmation for the exact operating model and locations.
+
+Default launch mode: ENQUIRY_ONLY / MANUAL_CONFIRMATION.
+
+No payment gateway, automatic dispatch promise or final online-sale wording is to be enabled merely because the software supports orders.
+
+3. USER TYPES AND ACCESS
+------------------------
+- guest: browse published retail catalogue.
+- retail_customer: verified phone user with retail access.
+- wholesale_applicant: verified phone user whose wholesale application is pending.
+- wholesaler: owner-approved business account with wholesale catalogue access.
+- staff: optional restricted admin access added later.
+- owner_admin: full catalogue, customer, wholesaler, pricing, order and settings access.
+
+Roles must be enforced in Supabase Row Level Security, not only hidden in the user interface.
+
+4. PHONE NUMBER AND OTP LOGIN
+-----------------------------
+Authentication provider: Supabase Auth phone OTP.
+
+Login flow:
+1. User selects India country code or enters an international phone number.
+2. Application normalises the number to E.164 format, for example +919876543210.
+3. CAPTCHA/anti-bot validation runs before OTP request.
+4. Supabase requests a six-digit OTP through the configured SMS provider.
+5. User enters the OTP.
+6. Supabase verifies the OTP and creates a secure authenticated session.
+7. A first-time user completes name and customer type selection.
+8. Returning users are redirected to their account or previous destination.
+
+Security requirements:
+- OTP secrets are never stored in application tables.
+- Rate-limit OTP requests by phone, IP and device signals.
+- Resend timer and maximum verification attempts.
+- Generic errors to prevent account enumeration.
+- Audit login events without storing OTP values.
+- Block abusive phone numbers and IP addresses.
+- Use secure server-managed cookies for web sessions where supported.
+- Owner/admin phone numbers must be pre-authorised in the database.
+- Owner/admin access should add a second factor or recovery method before production.
+
+India SMS requirement:
+- Complete applicable TRAI DLT Principal Entity, sender header and OTP content-template registration.
+- Use a supported Supabase provider or Supabase Send SMS Hook with a suitable Indian SMS provider.
+- Keep provider credentials only in Supabase or hosting secrets.
+
+5. RETAIL CUSTOMER FLOW
+-----------------------
+1. Browse catalogue without login.
+2. Select retail quantities and add to cart.
+3. See estimated total and product availability.
+4. Login with phone OTP at checkout/order-request stage.
+5. Add or select delivery/contact address.
+6. Confirm age/legal acknowledgements and service-area conditions where required.
+7. Submit order request.
+8. System stores immutable product-name, price and quantity snapshots.
+9. Owner checks stock, service area and compliance.
+10. Customer receives confirmed amount and next steps by account status, SMS or WhatsApp.
+11. Customer tracks the request in My Orders.
+
+6. WHOLESALE CUSTOMER FLOW
+--------------------------
+1. Login using phone OTP.
+2. Choose Apply for Wholesale Access.
+3. Submit:
+   - business/legal name;
+   - contact person;
+   - GSTIN where applicable;
+   - fireworks/explosives sale or possession licence details where applicable;
+   - licence expiry date;
+   - shop and delivery addresses;
+   - state and service area;
+   - supporting documents;
+   - expected purchase volume.
+4. Application status becomes pending_review.
+5. Owner reviews documents and may request correction.
+6. Owner approves, rejects, suspends or expires the account.
+7. Approved wholesaler sees wholesale prices, MOQ, carton quantity and B2B availability.
+8. Wholesaler submits quote/order request.
+9. Owner confirms price, stock, documentation, transport and terms.
+10. All approval and status changes are audited.
+
+7. PRICING MODEL
+----------------
+Each product can have channel-specific information:
+- retail_price;
+- retail_mrp;
+- retail_min_quantity;
+- wholesale_price;
+- wholesale_moq;
+- carton_quantity;
+- wholesale_tier prices;
+- retail availability;
+- wholesale availability;
+- retail visibility;
+- wholesale visibility.
+
+Recommended flexible model:
+- price_lists table: Retail, Wholesale Standard, Wholesale Silver, Wholesale Gold, or custom account list.
+- product_prices table: product, price list, unit price, minimum quantity, effective dates.
+- business_accounts.price_list_id assigns the correct wholesale pricing.
+
+Prices displayed to a logged-in wholesaler must come from the approved price list and must not be trusted from the browser during submission.
+
+8. CART AND ORDER RULES
+-----------------------
+- One user can maintain separate retail and wholesale carts.
+- Retail and wholesale items cannot be mixed in one order.
+- Server recalculates current price and eligibility before submission.
+- Out-of-stock and hidden products cannot be submitted.
+- Quantity must follow pack size, MOQ and carton rules.
+- Orders store product and price snapshots so historical orders never change when the catalogue changes.
+- Inventory reservation occurs only after owner confirmation unless explicitly configured otherwise.
+
+Suggested order statuses:
+- draft
+- submitted
+- compliance_review
+- awaiting_stock_confirmation
+- quote_sent
+- customer_accepted
+- confirmed
+- processing
+- packed
+- dispatched
+- delivered
+- rejected
+- cancelled
+
+Payment-related statuses are not enabled until the business flow is legally approved.
+
+9. ADMIN PANEL
+--------------
+Dashboard:
+- B2C requests today.
+- B2B requests today.
+- pending wholesale applications.
+- available, limited and out-of-stock products.
+- low-stock warnings.
+- request/order values by channel.
+
+Product management:
+- product name, description, category and brand;
+- photos and primary image;
+- retail and wholesale visibility;
+- retail price and MRP;
+- wholesale price lists;
+- MOQ and carton quantity;
+- channel-specific availability;
+- stock and low-stock threshold;
+- featured status;
+- draft, published, hidden and archived status.
+
+Wholesale management:
+- review applications and documents;
+- approve, reject, suspend or expire access;
+- assign price list;
+- set credit/manual terms later if approved;
+- record licence verification date and verifier;
+- show licence-expiry warnings.
+
+Order management:
+- separate B2C and B2B views;
+- view customer, items and snapshots;
+- verify eligibility and stock;
+- revise quote with audit history;
+- update status;
+- contact via call or WhatsApp;
+- generate printable list/invoice only when legally appropriate;
+- export reports.
+
+10. DATABASE TABLES
+-------------------
+Core identity and customer data:
+- profiles
+- customer_addresses
+- user_roles
+- business_accounts
+- business_account_members
+- wholesale_applications
+- wholesale_documents
+- account_verification_history
+
+Catalogue and pricing:
+- categories
+- brands
+- products
+- product_images
+- product_channel_settings
+- price_lists
+- product_prices
+- inventory
+
+Ordering:
+- carts
+- cart_items
+- orders
+- order_items
+- order_status_history
+- quotes
+- quote_items
+- inventory_reservations
+
+Operations:
+- delivery_regions
+- site_settings
+- compliance_settings
+- notifications
+- audit_logs
+
+11. ROW LEVEL SECURITY SUMMARY
+------------------------------
+- Guests may read only published retail catalogue fields.
+- Retail customers may read and change only their own profile, addresses, cart and orders.
+- Wholesale applicants may read only their own application and its status.
+- Approved wholesalers may read wholesale catalogue data assigned to their price list.
+- A wholesaler can never read another wholesaler's pricing, documents or orders.
+- Public users cannot read wholesale documents, customer phone numbers or admin data.
+- Only owner/admin may change products, prices, approval status and order status.
+- Service-role credentials never appear in browser code.
+
+12. IMPLEMENTATION ORDER
+------------------------
+1. Connect dedicated Supabase project.
+2. Scaffold Next.js + TypeScript application.
+3. Create schema and RLS migrations.
+4. Configure phone OTP and SMS provider in development.
+5. Build public retail catalogue.
+6. Build customer account and retail cart.
+7. Build wholesale application and approval.
+8. Add channel pricing and wholesale catalogue.
+9. Build B2C/B2B request/order administration.
+10. Complete DLT/SMS production configuration.
+11. Conduct legal and licence workflow review.
+12. Deploy staging and test all roles.
+13. Enable production only in the approved compliance mode.
+
+13. ACCEPTANCE CRITERIA
+-----------------------
+- A customer can authenticate with phone number and OTP.
+- A guest cannot access account, wholesale or admin data.
+- A retail user sees retail prices only.
+- A wholesale applicant does not see wholesale prices before approval.
+- An approved wholesaler sees only their assigned price list.
+- The owner can manage photos, prices, MOQ, carton quantities and availability per channel.
+- Retail and wholesale orders remain separated.
+- Every submitted item stores an immutable price snapshot.
+- Admin and customer data are protected by tested RLS policies.
+- Production mode cannot silently turn an enquiry into an online sale.
+
+END OF ARCHITECTURE RECORD
+==========================
