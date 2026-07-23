@@ -1,0 +1,522 @@
+GOWTHAM FIREWORKS WEBSITE — PERMANENT PROJECT PROGRESS RECORD
+==============================================================
+
+Repository: mkraja826/Gowthamfireworks
+Website: https://gowthamfireworksindustries.com/
+Default branch: main
+Repository visibility: Private
+Record created: 24 July 2026
+Current overall progress: 1%
+Current phase: Phase 0 — Project foundation
+
+PURPOSE OF THIS FILE
+--------------------
+This file is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
+
+It must be updated whenever a meaningful project change is completed. The goal is to ensure that no architecture decision, database change, deployment step, configuration requirement, completed feature, test result or unresolved problem is lost between development sessions.
+
+NON-NEGOTIABLE MAINTENANCE RULES
+--------------------------------
+1. Update this file after every completed milestone or important change.
+2. Never mark a task complete unless it has been implemented and verified.
+3. Record the exact files, migrations, routes or services changed whenever possible.
+4. Record failures and their fixes instead of deleting their history.
+5. Never place passwords, service-role keys, API secrets, access tokens or private customer data in this file.
+6. Keep the public website stable while major replacements are developed and tested separately.
+7. Distinguish clearly between:
+   - PLANNED: accepted but not started.
+   - IN PROGRESS: actively being implemented.
+   - BLOCKED: cannot proceed until a dependency is resolved.
+   - COMPLETE: implemented and verified.
+8. Update the overall percentage only when a defined milestone is genuinely completed.
+9. Add every production deployment commit and verification result to the build history.
+10. This tracker must remain in the repository for the complete life of the project.
+
+PROJECT GOAL
+------------
+Create a premium, mobile-first Gowtham Fireworks Industries catalogue and landing website with a secure owner-controlled admin panel.
+
+The owner must be able to manage the website without editing code, including:
+- Add and edit products.
+- Upload product photographs.
+- Set MRP and selling price.
+- Set availability.
+- Organise products by category.
+- Feature selected products.
+- Create combo or celebration packs.
+- Receive and manage customer enquiries.
+- Update business and website settings.
+
+The customer-facing website will use a catalogue and enquiry workflow rather than a conventional online-payment checkout.
+
+CONFIRMED PRODUCT DIRECTION
+---------------------------
+Status: APPROVED
+
+1. Public premium fireworks landing page.
+2. Searchable product catalogue.
+3. Product details with photograph, price and availability.
+4. Enquiry basket instead of direct online payment.
+5. WhatsApp-assisted enquiry submission.
+6. Secure owner admin page.
+7. Owner enters each product photo, price and availability.
+8. Separate Supabase project/account for Gowtham Fireworks.
+9. Gowtham Fireworks data must not be mixed with CapDent, Astro or other projects.
+
+PROPOSED TECHNICAL DIRECTION
+----------------------------
+Status: PROPOSED — confirm before implementation
+
+- Frontend and admin: Next.js with TypeScript.
+- Styling: Tailwind CSS or an equivalent maintainable design system.
+- Database: Supabase PostgreSQL.
+- Authentication: Supabase Auth for the owner/admin.
+- Product images: Supabase Storage initially.
+- Hosting and CDN: Cloudflare.
+- Public catalogue and admin may share one application, with the admin under /admin.
+- Database protection: Supabase Row Level Security.
+
+CURRENT REPOSITORY STATE
+------------------------
+Status: VERIFIED
+
+- Repository found: mkraja826/Gowthamfireworks
+- Visibility: Private
+- Default branch: main
+- Initial repository size when tracker was created: 0
+- Application code present: No
+- Progress tracker present: Yes
+
+OVERALL ROADMAP — 0% TO 100%
+----------------------------
+
+PHASE 0 — PROJECT FOUNDATION (0%–5%)
+Status: IN PROGRESS
+
+[COMPLETE] 1% — Locate and verify the correct GitHub repository.
+[COMPLETE] 1% — Create this permanent progress and build-history file.
+[PLANNED] Define the final project name, branding and design direction.
+[PLANNED] Confirm the frontend framework and package manager.
+[PLANNED] Add README, licence decision, .gitignore and environment example.
+[PLANNED] Establish development, staging and production workflow.
+[PLANNED] Define branch and commit strategy.
+[PLANNED] Connect the dedicated Supabase project safely.
+[PLANNED] Install Supabase Agent Skills in this repository.
+
+Exit criteria:
+- Repository has a clean foundation.
+- Stack is confirmed.
+- Dedicated Supabase project is connected.
+- No credentials are committed.
+- Local setup instructions are documented and tested.
+
+PHASE 1 — REQUIREMENTS AND ARCHITECTURE (5%–12%)
+Status: PLANNED
+
+- Audit the existing live website.
+- Confirm legal and business wording with the owner.
+- Confirm serviceable locations and enquiry process.
+- Confirm product categories and product data fields.
+- Define customer journey from landing page to enquiry submission.
+- Define admin user roles; initial version should use owner-only access.
+- Finalise database entity relationship design.
+- Finalise image storage and compression strategy.
+- Define analytics, SEO and privacy requirements.
+- Produce implementation acceptance criteria.
+
+Exit criteria:
+- Requirements are frozen for version 1.
+- Database and application architecture are documented.
+- No unresolved critical business-flow ambiguity remains.
+
+PHASE 2 — DESIGN SYSTEM AND UX (12%–20%)
+Status: PLANNED
+
+- Create visual direction: premium Sivakasi night-festival style.
+- Finalise colours, typography, spacing, buttons and cards.
+- Design desktop and mobile navigation.
+- Design homepage sections.
+- Design category listing.
+- Design product catalogue and product details.
+- Design enquiry basket.
+- Design customer enquiry form.
+- Design admin login.
+- Design admin dashboard and product editor.
+- Design empty, loading, error and unavailable states.
+- Confirm accessibility and mobile usability.
+
+Exit criteria:
+- Main public and admin screens are designed.
+- Mobile flow is approved before full implementation.
+
+PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–30%)
+Status: PLANNED
+
+Planned core tables:
+- profiles or admin_users
+- categories
+- brands
+- products
+- product_images
+- combo_packs
+- combo_pack_items
+- enquiries
+- enquiry_items
+- delivery_regions
+- site_settings
+- campaigns
+- customer_reviews
+- audit_logs
+
+Security tasks:
+- Enable Row Level Security on protected tables.
+- Allow public read access only to published catalogue data.
+- Allow public insertion only through a validated enquiry path.
+- Restrict product, price and availability changes to authorised owner accounts.
+- Protect customer enquiry information from public access.
+- Add storage policies for product image uploads.
+- Validate all server-side inputs.
+- Add database constraints and indexes.
+- Create migration and rollback records.
+
+Exit criteria:
+- Database schema is migrated and version-controlled.
+- Security policies are tested.
+- Anonymous users cannot modify catalogue data.
+
+PHASE 4 — ADMIN AUTHENTICATION AND SHELL (30%–38%)
+Status: PLANNED
+
+- Build secure /admin login.
+- Add authenticated admin layout.
+- Add owner session handling.
+- Add logout.
+- Add protected routes.
+- Add dashboard navigation.
+- Add access-denied handling.
+- Add password-reset workflow if required.
+- Add basic dashboard metrics.
+
+Exit criteria:
+- Only authorised owner accounts can access admin routes.
+- Session and logout behaviour are verified.
+
+PHASE 5 — PRODUCT AND CATEGORY ADMIN (38%–52%)
+Status: PLANNED
+
+Category management:
+- Create category.
+- Edit category.
+- Upload category image.
+- Set display order.
+- Activate or hide category.
+
+Product management:
+- Add product.
+- Edit product.
+- Save draft.
+- Publish product.
+- Archive or hide product.
+- Set product name and slug.
+- Select category and brand.
+- Enter description and pack information.
+- Enter MRP.
+- Enter selling price.
+- Calculate discount percentage automatically.
+- Set availability status.
+- Set optional stock quantity.
+- Mark featured products.
+- Mark green or low-sound products when applicable.
+- Change availability directly from the product list.
+- Search and filter products in admin.
+
+Availability statuses:
+- Available
+- Limited Stock
+- Out of Stock
+- Coming Soon
+- Hidden
+
+Exit criteria:
+- Owner can independently manage all public product data without code changes.
+
+PHASE 6 — IMAGE MANAGEMENT (52%–59%)
+Status: PLANNED
+
+- Upload product images securely.
+- Validate image type and file size.
+- Compress images.
+- Generate optimised WebP output where supported.
+- Generate thumbnails.
+- Support multiple images per product.
+- Select the primary product image.
+- Reorder images.
+- Delete unused images safely.
+- Prevent orphaned storage files.
+- Show upload progress and errors.
+- Apply CDN-friendly cache settings.
+
+Exit criteria:
+- Images are fast, consistent and manageable by the owner.
+- Invalid or unauthorised uploads are rejected.
+
+PHASE 7 — PUBLIC LANDING PAGE (59%–69%)
+Status: PLANNED
+
+- Build announcement/legal notice.
+- Build premium hero section.
+- Add primary catalogue and WhatsApp calls to action.
+- Add category section.
+- Add featured products and combo packs.
+- Add how-enquiry-works section.
+- Add why-choose-us section.
+- Add service area section.
+- Add business story and trust section.
+- Add customer reviews.
+- Add safety guidance.
+- Add contact and footer.
+- Add responsive mobile navigation.
+
+Exit criteria:
+- Homepage accurately represents the business.
+- Core content loads quickly on mobile.
+- All calls to action lead to a working flow.
+
+PHASE 8 — PUBLIC CATALOGUE AND PRODUCT PAGES (69%–78%)
+Status: PLANNED
+
+- Build catalogue grid.
+- Add search.
+- Add category filters.
+- Add price and availability filters where useful.
+- Build product detail pages.
+- Display product images, price and availability clearly.
+- Add related products.
+- Add share-to-WhatsApp action.
+- Prevent hidden or unpublished products from appearing publicly.
+- Add unavailable and empty states.
+- Add product URL and metadata generation.
+
+Exit criteria:
+- Customers can quickly find and understand available products.
+
+PHASE 9 — ENQUIRY BASKET AND CUSTOMER FLOW (78%–86%)
+Status: PLANNED
+
+- Add product to enquiry basket.
+- Change quantity.
+- Remove product.
+- Persist basket safely across navigation.
+- Show estimated total.
+- Enforce minimum enquiry value if business confirms one.
+- Collect customer name, mobile number, city, state and required date.
+- Collect optional message and preferred contact method.
+- Validate submission.
+- Save enquiry and item snapshots.
+- Generate readable WhatsApp message.
+- Show successful submission confirmation.
+- Prevent duplicate and abusive submissions.
+
+Important data rule:
+Each enquiry item should preserve the product name and price at the time of enquiry, so later product edits do not alter old records.
+
+Exit criteria:
+- Complete enquiry journey works on mobile and desktop.
+- No online payment is collected in version 1.
+
+PHASE 10 — ADMIN ENQUIRY MANAGEMENT (86%–91%)
+Status: PLANNED
+
+- List incoming enquiries.
+- View enquiry details and item list.
+- Filter by date and status.
+- Update status.
+- Call customer.
+- Open WhatsApp conversation.
+- Copy product list.
+- Export enquiry information where needed.
+- Add status history or audit record.
+
+Initial statuses:
+- New
+- Contacted
+- Confirmed
+- Processing
+- Completed
+- Cancelled
+
+Exit criteria:
+- Owner can process enquiries from the admin panel without accessing the database directly.
+
+PHASE 11 — SETTINGS, SEO AND ANALYTICS (91%–95%)
+Status: PLANNED
+
+- Business name, contact and WhatsApp settings.
+- Address and service-region settings.
+- Offer and announcement settings.
+- Minimum enquiry settings.
+- Homepage featured-content controls.
+- SEO titles and descriptions.
+- Canonical URLs.
+- Sitemap.xml.
+- Robots.txt.
+- Structured data where accurate.
+- Open Graph images and social metadata.
+- Privacy-friendly analytics.
+- Search Console verification.
+- Broken-link checks.
+
+Exit criteria:
+- Website is indexable, shareable and measurable.
+
+PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
+Status: PLANNED
+
+- Functional tests for all public routes.
+- Functional tests for all admin routes.
+- Database policy tests.
+- Authentication and session tests.
+- Mobile browser tests.
+- Desktop browser tests.
+- Slow-network tests.
+- Image upload tests.
+- Enquiry validation tests.
+- Error and recovery tests.
+- Accessibility review.
+- Performance review.
+- Security-header review.
+- Backup and rollback validation.
+- Confirm no secret is exposed in client code or Git history.
+
+Exit criteria:
+- No known critical defects.
+- Production release checklist passes.
+
+PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
+Status: PLANNED
+
+- Configure production environment variables securely.
+- Configure Cloudflare project.
+- Deploy staging build.
+- Run staging acceptance tests.
+- Back up or preserve the current live website.
+- Configure production domain and HTTPS.
+- Deploy production build.
+- Verify homepage, catalogue, admin login and enquiry flow.
+- Verify Supabase production policies.
+- Verify analytics, sitemap and Search Console.
+- Record production commit and deployment details.
+- Prepare rollback procedure.
+- Monitor initial production errors.
+
+100% completion definition:
+- Public site is live on the intended domain.
+- Owner can add products, images, prices and availability from admin.
+- Customers can browse and submit enquiries.
+- Security, mobile performance and production verification are complete.
+- Documentation and recovery instructions are current.
+
+PROGRESS SUMMARY
+----------------
+Overall: 1%
+
+Completed:
+- Correct private repository located and verified.
+- Permanent 0-to-100 project progress tracker created.
+
+In progress:
+- Project foundation.
+- Dedicated Supabase connection and stack confirmation.
+
+Next planned milestone:
+- Confirm the final application stack.
+- Connect only the dedicated Gowtham Fireworks Supabase project.
+- Add repository foundation files without committing secrets.
+
+BUILD AND CHANGE HISTORY
+------------------------
+
+Entry 001
+Date: 24 July 2026
+Progress: 0% -> 1%
+Status: COMPLETE
+Changes:
+- Located repository mkraja826/Gowthamfireworks.
+- Verified that it is private and uses main as the default branch.
+- Verified that it was empty before development began.
+- Added PROJECT_PROGRESS_0_TO_100.txt as the permanent build record.
+Reason:
+- Preserve the complete project journey and prevent loss of context across development sessions.
+Verification:
+- File creation committed to the main branch through GitHub.
+
+DECISION LOG
+------------
+
+Decision 001
+Date: 24 July 2026
+Decision: Maintain one permanent 0-to-100 progress file in the repository.
+Reason: Preserve architecture, implementation, failures, fixes, tests and deployment history.
+Status: APPROVED
+
+Decision 002
+Date: 24 July 2026
+Decision: The owner must control product photos, prices and availability through a secure admin page.
+Reason: The business must operate the catalogue without developer involvement for routine updates.
+Status: APPROVED
+
+Decision 003
+Date: 24 July 2026
+Decision: Use a separate Supabase account/project for Gowtham Fireworks and never reuse CapDent or Astro data resources.
+Reason: Data isolation, security and easier maintenance.
+Status: APPROVED
+
+OPEN DECISIONS
+--------------
+- Confirm Next.js and TypeScript as the final application framework.
+- Confirm Cloudflare Workers or Pages deployment mode after framework setup.
+- Confirm Supabase Storage versus Cloudflare R2 for final production image storage.
+- Confirm exact business wording, minimum enquiry amount and serviceable regions.
+- Confirm whether the current site will remain live until a complete replacement passes staging tests.
+
+KNOWN RISKS
+-----------
+- Fireworks business content and transaction wording require careful legal review.
+- Product images can create high storage and bandwidth usage if not compressed.
+- Public enquiry forms can attract spam without validation and rate limiting.
+- Misconfigured Supabase Row Level Security could expose admin or customer data.
+- Replacing the live website before full staging verification could interrupt the business.
+
+SECURITY AND SECRET-HANDLING RECORD
+-----------------------------------
+Never commit any of the following:
+- Supabase service-role key.
+- Database password.
+- Personal access token.
+- Cloudflare API token.
+- Private signing secret.
+- Customer personal data export.
+- Production .env file.
+
+Safe repository pattern:
+- Commit .env.example with variable names only.
+- Store real values in local environment files and hosting secrets.
+- Use the public Supabase anon key only where intended and protected by correct Row Level Security.
+
+SESSION HANDOVER TEMPLATE
+-------------------------
+Use this section whenever stopping or resuming a major development session.
+
+Date:
+Current progress percentage:
+Current branch:
+Last completed task:
+Files changed:
+Database migrations applied:
+Tests run and results:
+Deployment status:
+Known issue or blocker:
+Exact next step:
+
+END OF PERMANENT PROJECT RECORD
+===============================
