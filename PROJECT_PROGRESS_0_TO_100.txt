@@ -8,7 +8,7 @@ Repository visibility: Private
 Record created: 24 July 2026
 Last updated: 24 July 2026
 Current overall progress: 18%
-Current phase: First application foundation complete; Cloudflare deployment repair awaiting successful verification
+Current phase: First application foundation complete; senior UI/UX review complete; public visual redesign required before production
 
 PURPOSE
 -------
@@ -25,7 +25,9 @@ NON-NEGOTIABLE RULES
 5. Keep the existing live website stable until the replacement passes staging acceptance.
 6. Use only the dedicated Gowtham Fireworks Supabase project/account.
 7. Keep public Personal/Business onboarding separate from private Admin access.
-8. Update the progress percentage only after a genuine verified milestone.
+8. Update progress percentage only after a genuine verified milestone.
+9. Do not deploy placeholder copy, demo product claims or emoji product imagery to production.
+10. Do not publicly advertise Owner/Admin login.
 
 PROJECT GOAL
 ------------
@@ -51,8 +53,96 @@ Status: APPROVED
 - Owner controls product photos, retail/wholesale prices, stock and availability.
 - Default transaction mode: ENQUIRY_ONLY / MANUAL_CONFIRMATION.
 - No payment gateway in version one.
-- Visual direction: “Sivakasi Midnight Festival”.
-- Public UI is celebratory; admin UI is light, calm and operational.
+- Public visual layer must be product-led, authentic and conversion-focused.
+- Admin UI should remain light, calm and operational.
+
+DESIGN DIRECTION STATUS
+-----------------------
+Previous direction: “Sivakasi Midnight Festival”.
+Current status: SUPERSEDED FOR PUBLIC UI AFTER SENIOR REVIEW.
+
+Reason:
+- The first implementation looked like a generic dark SaaS/startup template.
+- It described platform architecture rather than helping customers shop.
+- Emojis replaced real product imagery.
+- Dark gradients, glass panels and Georgia headings did not create an authentic Gowtham identity.
+- Public copy exposed development placeholders.
+- The homepage lacked enough immediate commercial proof, contact and serviceability information.
+
+New recommended direction: “Modern Sivakasi Market”.
+
+Principles:
+- 75–80% warm white/light product surfaces.
+- Deep maroon/navy reserved for header, footer and selected banners.
+- Saffron/gold used as controlled accents.
+- Real product packaging provides most colour and energy.
+- Real factory/team/warehouse imagery provides trust.
+- Fast mobile catalogue, visible search, WhatsApp, cart and serviceability.
+- Direct customer language instead of internal system language.
+
+Detailed review:
+- docs/UI_UX_SENIOR_REVIEW_AND_REDESIGN_PLAN.md
+- Review commit: 8150b19c312ea88ad2568b4d090ebddff2c6f8c8
+
+SENIOR UI/UX REVIEW — MAJOR FINDINGS
+------------------------------------
+Current source-level UI/UX maturity assessment: 4.5/10.
+
+Critical public issues:
+1. Hero panel shows internal architecture such as “2 buying paths”, “1 owner dashboard” and OTP instead of product/customer value.
+2. Product and category imagery uses emojis rather than real crackers and packaging.
+3. Public design is generic dark-template styling rather than a distinctive Sivakasi retail identity.
+4. Inter is named but not loaded; Georgia is overused for headings and branding.
+5. Public copy says the site is developing and that real information will be added later.
+6. Homepage uses oversized repeated sections and abstract messaging before product/service proof.
+7. Header lacks visible search and prominent WhatsApp support.
+8. Public footer exposes Owner Login, contrary to the approved private-admin rule.
+9. Catalogue has redundant category controls but lacks meaningful filter/sort tools.
+10. Product cards lack real imagery and efficient mobile comparison.
+11. Product detail lacks image gallery, sticky mobile CTA and stronger purchase support.
+12. Cart lacks progress, serviceability and minimum-requirement guidance.
+13. Trust is described but not proven with verified brands, contacts, factory images, service regions or current price-list information.
+14. Accessibility needs focus-visible states, skip navigation, stronger mobile menu behaviour and improved semantics.
+
+Critical admin issues:
+1. Add Product is one long form.
+2. Category creation uses window.prompt.
+3. No image preview/crop/order workflow.
+4. No autosave or unsaved-change warning.
+5. No retail/wholesale card preview.
+6. Product list lacks thumbnails, prices, category and edit actions.
+7. Related product inserts are not transactional and can leave partial records.
+
+REDESIGN PRIORITIES
+-------------------
+Phase A — visual reset and trust repair:
+- Remove emoji product/category imagery.
+- Remove development copy from public pages.
+- Remove Owner Login from public footer.
+- Replace hero architecture panel with authentic product/factory visual.
+- Load real fonts using next/font.
+- Rebuild header around search, WhatsApp and cart.
+- Add verified contact/serviceability/trust strip.
+
+Phase B — catalogue conversion UX:
+- Redesign product cards around real 1:1 images.
+- Keep compact two-column mobile catalogue where readable.
+- Add proper Filter and Sort experience.
+- Redesign product detail with gallery and sticky mobile CTA.
+- Add request progress and serviceability to cart.
+
+Phase C — content and brand proof:
+- Add real logo variants.
+- Add verified factory/team/warehouse photography.
+- Add verified brands, offers, service regions and current price-list date.
+- Rewrite public copy in direct customer language.
+- Add authentic reviews only when available.
+
+Phase D — admin usability:
+- Replace long form with Basics, Images, Retail, Wholesale, Inventory, SEO and Preview sections.
+- Add product table search, filters, thumbnails and actions.
+- Replace browser prompts with proper modals.
+- Add image management, autosave, validation and transactional product creation.
 
 TECHNICAL STACK
 ---------------
@@ -97,7 +187,7 @@ Public and retail:
 - Responsive homepage.
 - Retail and Wholesale entry cards.
 - Categories and featured products.
-- Retail catalogue search and filters.
+- Retail catalogue search and category filtering.
 - Product detail pages with static generation.
 - Availability badges.
 - Browser-persisted retail cart.
@@ -212,16 +302,16 @@ Files:
 
 VALIDATION STATUS
 -----------------
-Status: NEXT.JS, TYPESCRIPT AND OPENNEXT BUILD VERIFIED; WORKER DEPLOYMENT PENDING
+Status: NEXT.JS, TYPESCRIPT AND OPENNEXT BUILD VERIFIED; WORKER DEPLOYMENT AND VISUAL ACCEPTANCE PENDING
 
 Verified in Cloudflare CI:
 - Dependencies installed successfully.
-- Correct Cloudflare command `npm run cf:build` executed.
-- OpenNext invoked `$ next build` exactly once after recursive fix.
+- Correct Cloudflare command npm run cf:build executed.
+- OpenNext invoked next build exactly once after recursive fix.
 - Next.js compiled successfully.
 - TypeScript completed successfully.
 - 21 static/SSG pages generated.
-- `.open-next/worker.js` generated.
+- .open-next/worker.js generated.
 - OpenNext build completed.
 - Static assets uploaded.
 
@@ -254,8 +344,7 @@ Cause:
 Fix:
 - Added explicit wrangler.jsonc and open-next.config.ts.
 - Removed self-service binding for first deployment.
-- Added OpenNext/Wrangler dependencies.
-- Added deployment documentation.
+- Added OpenNext/Wrangler dependencies and deployment documentation.
 
 Relevant commits:
 - b76c9b98a1e4a0afd254052ae8e66eb6790e51d2
@@ -267,17 +356,16 @@ DEPLOYMENT FAILURE 002 — RECURSIVE OPENNEXT BUILD
 -------------------------------------------------
 Observed:
 - Deployment ran longer than 20 minutes.
-- Repeated “OpenNext — Cloudflare build” headings.
-- Repeated `$ opennextjs-cloudflare build` lines.
+- Repeated OpenNext headings and repeated opennextjs-cloudflare build lines.
 
 Cause:
-- package `build` script pointed to OpenNext.
+- package build script pointed to OpenNext.
 - OpenNext internally invoked the package build script, causing recursion.
 
 Fix:
-- `build` restored to `next build`.
-- Added `cf:build` for OpenNext.
-- Cloudflare Build command changed to `npm run cf:build`.
+- build restored to next build.
+- Added cf:build for OpenNext.
+- Cloudflare Build command changed to npm run cf:build.
 
 Relevant commits:
 - 0c9c44f65919c6b99373be27452085f67dcb0337
@@ -287,21 +375,17 @@ Relevant commits:
 DEPLOYMENT FAILURE 003 — WORKER NAME AND FUTURE DATE
 ----------------------------------------------------
 Observed after successful build:
-- Cloudflare warning: config Worker name `gowtham-fireworks` did not match connected project `gowthamfireworks`.
-- Cloudflare code 10021: compatibility date 2026-07-24 was in the future from Cloudflare UTC.
-
-Cause:
-- Worker name mismatch between wrangler config and connected Cloudflare project.
-- Deployment occurred before 24 July in Cloudflare UTC.
+- Worker name gowtham-fireworks did not match connected project gowthamfireworks.
+- Cloudflare code 10021 because compatibility date 2026-07-24 was ahead of Cloudflare UTC.
 
 Fix:
-- Worker name changed to `gowthamfireworks`.
-- Compatibility date changed to `2026-07-23`.
+- Worker name changed to gowthamfireworks.
+- Compatibility date changed to 2026-07-23.
 
 Relevant commits:
-- Wrangler fix: 11203bd53706a7c6e43fb62f390365833587ddf0
-- Deployment guide: 3b0f39781fd7ca8849d61021b97f81230db348fc
-- Failure record: d2878973c1fc04b3bf35c514e13177ecb927ce62
+- 11203bd53706a7c6e43fb62f390365833587ddf0
+- 3b0f39781fd7ca8849d61021b97f81230db348fc
+- d2878973c1fc04b3bf35c514e13177ecb927ce62
 
 ROADMAP — 0% TO 100%
 ---------------------
@@ -314,13 +398,15 @@ Status: COMPLETE FOR FIRST SCAFFOLD
 
 PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
 Status: SUBSTANTIALLY DOCUMENTED
-- B2C/B2B, profiles, admin routing, test OTP, compliance modes and theme complete.
+- B2C/B2B, profiles, admin routing, test OTP and compliance modes documented.
 - Business confirmations remain: licences, regions, transport and legal wording.
 
 PHASE 2 — DESIGN SYSTEM AND UX (12%–20%)
-Status: FIRST IMPLEMENTATION PASS COMPLETE
-- Responsive public/admin shell complete.
-- Browser visual review, accessibility corrections and real assets pending.
+Status: FIRST IMPLEMENTATION REVIEWED AND REJECTED FOR PRODUCTION VISUAL QUALITY
+- Responsive public/admin shell exists.
+- Senior UI/UX review complete.
+- Public visual redesign required.
+- Real assets, accessibility corrections and conversion UX pending.
 
 PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–31%)
 Status: SQL DRAFT COMPLETE; EXECUTION PENDING
@@ -333,9 +419,9 @@ Status: FRONTEND FOUNDATION COMPLETE; INTEGRATION PENDING
 - Test-number configuration, session protection and routing tests pending.
 
 PHASE 5 — ADMIN PRODUCT, PRICE, CATEGORY AND CONTENT MANAGEMENT (40%–54%)
-Status: FIRST CREATE-PRODUCT FLOW CODED; NOT TESTED
+Status: FIRST CREATE-PRODUCT FLOW CODED; ADMIN UX REDESIGN REQUIRED
 - Product/category creation foundation complete.
-- Edit, delete, bulk actions, transaction safety and content editor pending.
+- Structured editor, edit/delete, bulk actions, transaction safety and content editor pending.
 
 PHASE 6 — IMAGE AND BUSINESS DOCUMENT MANAGEMENT (54%–61%)
 Status: STORAGE FOUNDATION CODED
@@ -343,19 +429,19 @@ Status: STORAGE FOUNDATION CODED
 - Compression, thumbnails, multiple images and private document upload pending.
 
 PHASE 7 — PUBLIC LANDING PAGE (61%–69%)
-Status: STATIC DEMO FOUNDATION COMPLETE
-- Responsive landing structure complete.
-- Live Supabase content and real factory assets pending.
+Status: STATIC DEMO FOUNDATION COMPLETE; REDESIGN REQUIRED
+- Existing landing structure works technically.
+- Product-led redesign, real assets and live content pending.
 
 PHASE 8 — RETAIL AND WHOLESALE CATALOGUES (69%–78%)
-Status: RETAIL DEMO FOUNDATION COMPLETE
-- Retail demo catalogue/search/product pages complete.
-- Live queries and authorised wholesale pricing pending.
+Status: RETAIL DEMO FOUNDATION COMPLETE; UX REDESIGN REQUIRED
+- Demo search/product pages exist.
+- Real product photography, filter/sort UX, live queries and authorised wholesale pricing pending.
 
 PHASE 9 — CARTS, QUOTES AND REQUEST FLOW (78%–87%)
 Status: RETAIL LOCAL CART FOUNDATION COMPLETE
 - Browser cart complete.
-- Authenticated persistence, address, request submission and server validation pending.
+- Progress, serviceability, authenticated persistence, address, request submission and server validation pending.
 
 PHASE 10 — ADMIN BUSINESS AND REQUEST MANAGEMENT (87%–92%)
 Status: SHELL ONLY
@@ -368,12 +454,13 @@ Status: PLANNED
 PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
 Status: STARTED
 - Next.js, TypeScript and OpenNext production build passed.
-- Browser, Supabase, RLS, OTP, accessibility and security tests remain.
+- Browser, visual acceptance, Supabase, RLS, OTP, accessibility and security tests remain.
 
 PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
 Status: CONFIGURATION REPAIRED; FIRST SUCCESSFUL WORKER DEPLOY PENDING
 - Three deployment failures diagnosed and fixed.
 - Fresh deployment and route verification pending.
+- Production cutover blocked until redesign and acceptance.
 
 BUILD AND CHANGE HISTORY
 ------------------------
@@ -409,13 +496,23 @@ Entry 006 — 16% -> 18%
 
 Entry 007 — remained 18%
 - Deployment failure 002 recursive build diagnosed and corrected.
-- Build command split into `build` and `cf:build`.
+- Build command split into build and cf:build.
 
 Entry 008 — remained 18%
 - Correct OpenNext build completed in Cloudflare CI.
 - Deployment failure 003 exposed Worker name mismatch and future UTC compatibility date.
 - Worker name and compatibility date corrected.
-- Successful Worker deployment still pending.
+
+Entry 009 — remained 18%
+Date: 24 July 2026
+Status: SENIOR UI/UX REVIEW COMPLETE; REDESIGN NOT YET IMPLEMENTED
+- Reviewed homepage, global CSS, navigation, catalogue, product cards, cart and admin product workflow.
+- Rated current source-level UI/UX maturity 4.5/10.
+- Determined public design needs a structured visual reset, not cosmetic polishing.
+- Superseded “Sivakasi Midnight Festival” public direction with “Modern Sivakasi Market”.
+- Added docs/UI_UX_SENIOR_REVIEW_AND_REDESIGN_PLAN.md.
+- Review commit: 8150b19c312ea88ad2568b4d090ebddff2c6f8c8
+- No application UI code changed in this review step.
 
 DECISION LOG
 ------------
@@ -432,28 +529,34 @@ DECISION LOG
 011. Keep SQL in supabase/schema.sql until frontend review. APPROVED.
 012. Use demo catalogue data until Supabase integration. TEMPORARY APPROVED.
 013. Deploy through explicit OpenNext/Wrangler configuration, not CI auto-migration. APPROVED.
-014. Use Cloudflare Build command `npm run cf:build` and Deploy command `npx wrangler deploy`. APPROVED.
+014. Use Cloudflare Build command npm run cf:build and Deploy command npx wrangler deploy. APPROVED.
 015. Match wrangler Worker name exactly to Cloudflare connected-project name. APPROVED.
 016. Use a compatibility date that is not ahead of Cloudflare UTC. APPROVED.
+017. Current public visual design is not accepted for production. APPROVED.
+018. Replace public direction with product-led “Modern Sivakasi Market”. APPROVED FOR REDESIGN.
+019. Remove public Owner Login, emoji product art and development placeholder copy before production. APPROVED.
 
 OPEN DECISIONS
 --------------
 - Dedicated Supabase project URL and publishable key.
 - Test phone numbers and OTP values.
 - Owner-admin phone number for bootstrap.
-- Logo and real factory/product images.
+- Final logo and real factory/product images.
 - Licences, service regions, transport and legal wording.
-- Taxes, minimum values and cancellation/returns approach.
+- Verified taxes, minimum values, offers and cancellation/returns approach.
 - Production SMS provider and DLT setup.
 - Custom-domain cutover timing.
 
 KNOWN RISKS
 -----------
+- Current public design is not accepted for production.
 - Successful Worker deployment after failure 003 is not yet verified.
 - Supabase SQL has not been applied or tested.
 - Admin routes need server-side hardening beyond client role checks.
 - Product creation should become transactional.
-- Public catalogue still uses demo products.
+- Public catalogue still uses demo products and emoji imagery.
+- Public pages contain placeholder/development copy.
+- Public footer currently advertises Owner Login and must be corrected.
 - Fireworks sale, possession, transport and online wording require specialist review.
 - Incorrect RLS could expose phone numbers, pricing or documents.
 - Images require compression and storage controls.
@@ -461,27 +564,28 @@ KNOWN RISKS
 
 NEXT EXACT STEPS
 ----------------
-1. Trigger a new Cloudflare deployment from latest main.
-2. Keep Build command `npm run cf:build`.
-3. Keep Deploy command `npx wrangler deploy`.
-4. Confirm no Worker-name warning and no Cloudflare code 10021.
-5. Confirm Worker `gowthamfireworks` deploys and returns a workers.dev URL.
-6. Verify public and admin routes.
-7. Review the UI in a browser.
-8. Run supabase/schema.sql only in the dedicated Gowtham Fireworks project after UI review.
-9. Configure Test OTP numbers and bootstrap owner_admin.
-10. Replace demo catalogue data with live Supabase queries.
+1. Preserve current functional routes and begin the public visual redesign.
+2. Remove emoji imagery, development copy and public Owner Login.
+3. Rebuild header, hero, homepage hierarchy and product cards using the approved review plan.
+4. Add temporary high-quality neutral product placeholders only until real factory images are supplied.
+5. Improve mobile catalogue, filters, sticky actions and cart progress.
+6. Redesign admin Products workflow into structured sections and a usable product table.
+7. Run npm run typecheck, npm run lint, npm run build and npm run cf:build.
+8. Deploy the redesigned preview with npx wrangler deploy.
+9. Perform browser/mobile visual acceptance before running the Supabase schema.
+10. Run supabase/schema.sql only in the dedicated Gowtham Fireworks project after UI acceptance.
 
 SESSION HANDOVER
 ----------------
 Date: 24 July 2026
 Progress: 18%
 Branch: main
-Last completed task: Fixed Cloudflare Worker name mismatch and future compatibility date.
+Last completed task: Senior UI/UX source review and redesign plan.
 Database migrations applied: None.
-Build status: Next.js, TypeScript and OpenNext build passed in Cloudflare CI.
-Deployment status: Three failures diagnosed and fixed; fresh deployment pending.
-Exact next step: Deploy latest main and verify Worker `gowthamfireworks`.
+Build status: Next.js, TypeScript and OpenNext build passed in Cloudflare CI before redesign.
+Deployment status: Three failures diagnosed and fixed; fresh Worker deployment pending.
+Design status: Current public design rejected; redesign plan documented; implementation pending.
+Exact next step: Rebuild the public UI using docs/UI_UX_SENIOR_REVIEW_AND_REDESIGN_PLAN.md while preserving working functionality.
 
 END OF PERMANENT PROJECT RECORD
 ===============================
