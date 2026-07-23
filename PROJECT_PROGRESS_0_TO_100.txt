@@ -12,310 +12,139 @@ Current phase: Phase 0 — Project foundation and requirements definition
 
 PURPOSE OF THIS FILE
 --------------------
-This file is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
+This is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
 
-It must be updated after every meaningful architecture decision, database change, code change, deployment, test, failure, fix or milestone. The purpose is to ensure that the project can always be resumed without losing how it was built.
+Update it after every meaningful architecture decision, database migration, code change, test, deployment, failure, fix or milestone so the project can always be resumed without losing how it was built.
 
-NON-NEGOTIABLE MAINTENANCE RULES
---------------------------------
-1. Update this file after every completed milestone or important change.
-2. Never mark a task COMPLETE unless it has been implemented and verified.
-3. Record exact files, migrations, routes, services and commits whenever possible.
-4. Preserve failures and fixes instead of deleting their history.
-5. Never store passwords, service-role keys, API secrets, access tokens, OTP values or private customer data here.
-6. Keep the existing public website stable while the replacement is developed and tested separately.
-7. Use these states consistently:
-   - PLANNED: accepted but not started.
-   - IN PROGRESS: actively being implemented.
-   - BLOCKED: waiting for a dependency or decision.
-   - COMPLETE: implemented and verified.
-8. Update the percentage only when a defined milestone is genuinely completed.
-9. Record every production deployment commit and verification result.
-10. Keep this tracker in the repository for the complete life of the project.
+MAINTENANCE RULES
+-----------------
+1. Never mark implementation COMPLETE until it is built and verified.
+2. Record exact files, migrations, routes, services and commits whenever possible.
+3. Preserve failures and fixes instead of deleting their history.
+4. Never store passwords, service-role keys, API secrets, access tokens, OTP values or customer data here.
+5. Keep the existing live website stable while the replacement is developed and tested separately.
+6. Use PLANNED, IN PROGRESS, BLOCKED and COMPLETE consistently.
+7. Update percentage only when a defined milestone is genuinely completed.
+8. Keep this file for the complete life of the project.
 
 PROJECT GOAL
 ------------
-Build a premium, mobile-first Gowtham Fireworks Industries website serving both:
+Build a premium mobile-first Gowtham Fireworks Industries platform serving:
 
-- B2C: factory to retail customer.
-- B2B: factory to approved wholesaler.
+- B2C: factory to personal/retail customer.
+- B2B: factory to approved business/wholesaler.
 
-The website will include a secure owner-controlled admin panel. The owner must manage the website without editing code, including:
-
-- Product names and descriptions.
-- Product photographs.
-- Categories and brands.
-- Retail and wholesale prices.
-- Retail and wholesale availability.
-- MOQ and carton quantities.
-- Stock and low-stock status.
-- Featured products and combo packs.
-- Retail customer requests/orders.
-- Wholesale applications and requests/orders.
-- Business, contact and website settings.
+The owner must control products, photos, categories, retail and wholesale pricing, MOQ, carton quantities, availability, stock, customer requests, business applications, orders and website settings without editing code.
 
 CONFIRMED PRODUCT DIRECTION
 ---------------------------
 Status: APPROVED
 
-1. Public premium fireworks landing page.
-2. Searchable product catalogue.
-3. Product details with photograph, price and availability.
-4. One platform with separate Retail and Wholesale customer paths.
-5. Factory-to-customer B2C flow.
-6. Factory-to-wholesaler B2B flow.
-7. Phone-number and OTP authentication for customers and owner/admin.
-8. Wholesale users require owner approval before wholesale prices are visible.
-9. Secure owner admin page.
-10. Owner enters and controls every product photo, price and availability.
-11. Separate Supabase project/account for Gowtham Fireworks.
-12. Gowtham Fireworks data must never be mixed with CapDent, Astro or another project.
-13. Production ordering must use a compliance-first configuration.
-14. Default launch behaviour is enquiry/order-request plus manual owner confirmation, not automatic online sale or automatic dispatch.
+1. Premium public landing page and searchable catalogue.
+2. One application with separate Personal/B2C and Business/B2B paths.
+3. Phone-number and OTP authentication.
+4. A first-time customer chooses Personal or Business only after successful OTP verification.
+5. Personal creates an active retail profile.
+6. Business creates a business profile and pending wholesale application.
+7. Wholesale prices remain hidden until owner approval.
+8. Admin is never shown as a public account-type choice.
+9. Pre-authorised owner/admin users log in through /admin/login and go directly to /admin after role verification.
+10. Normal customers cannot promote themselves to admin.
+11. Owner controls every product photo, price and availability from a secure admin panel.
+12. Dedicated Supabase account/project; never mix data with CapDent, Astro or another project.
+13. Production ordering uses a compliance-first configuration.
+14. Default launch behaviour is enquiry/order request plus manual owner confirmation.
+
+AUTHENTICATION AND PROFILE ROUTING
+----------------------------------
+Status: APPROVED; NOT IMPLEMENTED
+
+Customer route:
+- /login
+- Enter phone number and OTP.
+- After OTP, server reads role and profile.
+- Existing users go directly to their correct account area.
+- New users choose Personal or Business.
+
+First-time Personal result:
+- profiles.account_type = personal
+- role = retail_customer
+- status = active
+- retail access available immediately, subject to operating rules.
+
+First-time Business result:
+- profiles.account_type = business
+- role = wholesale_applicant
+- business status = pending_review
+- wholesale pricing unavailable until owner approval.
+
+Admin route:
+- /admin/login
+- Only pre-authorised owner_admin or staff identities are accepted.
+- owner_admin redirects directly to /admin.
+- staff redirects only to allowed admin sections.
+- non-admin authenticated users are denied.
+- no public Admin signup or Admin option exists.
+
+Server routing priority:
+1. owner_admin -> /admin
+2. staff -> authorised admin area
+3. existing personal -> /account or prior retail destination
+4. approved business -> /wholesale
+5. pending business -> /business/application-status
+6. rejected/suspended/expired business -> relevant status page
+7. no profile -> /onboarding/account-type
+
+Detailed record:
+- docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt
 
 COMMERCE AND COMPLIANCE MODE
 ----------------------------
-Status: APPROVED ARCHITECTURE; LEGAL OPERATING REVIEW STILL REQUIRED
+Status: APPROVED ARCHITECTURE; LEGAL OPERATING REVIEW REQUIRED
 
-The software will support carts, order records, quotes, confirmations and status tracking. Production behaviour will be controlled by a site setting:
-
-- ENQUIRY_ONLY: customers submit an enquiry/order request; no online payment or completed online sale.
-- MANUAL_CONFIRMATION: owner verifies stock, customer, location, licences where applicable, transport and legal eligibility before confirmation.
-- LICENSED_ORDERING: can only be enabled after written legal/compliance approval for the exact business model and service locations.
+- ENQUIRY_ONLY: customer submits a request; no completed online sale.
+- MANUAL_CONFIRMATION: owner checks customer, location, licence where applicable, stock, transport and eligibility.
+- LICENSED_ORDERING: disabled until written legal/compliance approval for the exact model and service regions.
 
 Default launch mode:
-- ENQUIRY_ONLY / MANUAL_CONFIRMATION.
+- ENQUIRY_ONLY / MANUAL_CONFIRMATION
 
-No payment gateway, automatic dispatch promise or final online-sale wording will be enabled simply because the application technically supports orders.
+No payment gateway or automatic dispatch promise is enabled merely because the software supports carts and order records.
 
-DETAILED ARCHITECTURE RECORD
-----------------------------
-Status: COMPLETE
-
-File:
-- docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt
-
-This file records:
-- B2C customer journey.
-- B2B wholesaler application and approval journey.
-- Phone OTP authentication.
-- Retail and wholesale pricing separation.
-- Cart and order rules.
-- Admin controls.
-- Database tables.
-- Row Level Security design.
-- Implementation sequence.
-- Acceptance criteria.
-
-PROPOSED TECHNICAL DIRECTION
-----------------------------
+TECHNICAL DIRECTION
+-------------------
 Status: PROPOSED — confirm during foundation implementation
 
-- Frontend and admin: Next.js with TypeScript.
-- Styling: Tailwind CSS or an equivalent maintainable design system.
-- Package manager: to be confirmed before scaffolding.
+- Frontend/admin: Next.js with TypeScript.
+- Styling: Tailwind CSS or equivalent maintainable design system.
 - Database: Supabase PostgreSQL.
 - Authentication: Supabase Auth phone OTP.
-- SMS delivery: supported provider or Supabase Send SMS Hook with a suitable Indian SMS provider.
-- India OTP production requirement: applicable TRAI DLT Principal Entity, sender header and content-template registration.
-- Product and business documents: Supabase Storage initially.
-- Hosting and CDN: Cloudflare.
-- Public, account and admin interfaces may share one application.
-- Database authorization: Supabase Row Level Security.
-- Server-side validation: Next.js server routes/actions or secure backend functions.
+- Authorization: Supabase Row Level Security plus trusted server checks.
+- SMS: supported provider or Supabase Send SMS Hook.
+- Storage: Supabase Storage initially for product images and private business documents.
+- Hosting/CDN: Cloudflare.
+- Public app, account area and admin may share one application.
 
-USER AND ACCESS MODEL
----------------------
-Status: APPROVED
+CORE USER TYPES
+---------------
+- guest
+- retail_customer
+- wholesale_applicant
+- wholesaler
+- staff
+- owner_admin
 
-- guest: sees published retail catalogue only.
-- retail_customer: verified phone user with retail account access.
-- wholesale_applicant: submitted business application, awaiting owner decision.
-- wholesaler: approved business account with assigned wholesale price list.
-- staff: optional restricted admin role added later.
-- owner_admin: full control over catalogue, pricing, availability, applications, requests/orders and settings.
+Roles are enforced in database policies and server logic, never only by hiding UI.
 
-All roles must be enforced in database policies and not merely hidden in the user interface.
-
-PHONE OTP AUTHENTICATION PLAN
------------------------------
-Status: APPROVED; NOT IMPLEMENTED
-
-Customer flow:
-1. Enter phone number.
-2. Normalise to E.164 format, such as +919876543210.
-3. Run CAPTCHA/anti-bot validation.
-4. Request six-digit OTP through Supabase Auth.
-5. Verify OTP.
-6. Create secure authenticated session.
-7. First-time user completes profile and chooses retail or wholesale application.
-8. Returning user continues to account or previous destination.
-
-Security requirements:
-- Never store OTP values in project tables or logs.
-- Rate-limit by phone number, IP and device signals.
-- Add resend timer and maximum verification attempts.
-- Use generic authentication errors.
-- Audit login events without storing secrets.
-- Pre-authorise owner/admin phone numbers.
-- Add an additional recovery or second-factor method for production admin access.
-- Store provider credentials only in Supabase or hosting secrets.
-
-B2C — FACTORY TO CUSTOMER FLOW
-------------------------------
-Status: APPROVED; NOT IMPLEMENTED
-
-1. Guest browses the retail catalogue.
-2. Customer adds retail items to a retail cart.
-3. Website displays estimated value and current availability.
-4. Phone OTP login is required before submission.
-5. Customer selects or adds address and contact details.
-6. Customer accepts required safety, age, location and service conditions.
-7. Customer submits an order/enquiry request.
-8. Server stores immutable product-name, price and quantity snapshots.
-9. Owner checks stock, service area and compliance.
-10. Owner confirms, revises or rejects the request.
-11. Customer tracks status in My Orders.
-
-B2B — FACTORY TO WHOLESALER FLOW
---------------------------------
-Status: APPROVED; NOT IMPLEMENTED
-
-1. User logs in using phone OTP.
-2. User chooses Apply for Wholesale Access.
-3. Application collects business name, contact person, GSTIN where applicable, licence details where applicable, expiry date, addresses, state, expected purchase volume and supporting documents.
-4. Application status becomes pending_review.
-5. Owner reviews and may request correction.
-6. Owner approves, rejects, suspends or expires access.
-7. Approved wholesaler receives an assigned wholesale price list.
-8. Only approved wholesalers can see wholesale prices, MOQ, carton quantities and wholesale-only availability.
-9. Wholesaler submits quote/order request.
-10. Owner confirms price, stock, documentation, transport and terms.
-11. Approval and status changes are recorded in audit history.
-
-PRICING AND CART RULES
-----------------------
-Status: APPROVED; NOT IMPLEMENTED
-
-- Retail and wholesale items cannot be mixed in one cart or order.
-- A user may maintain separate retail and wholesale carts.
-- Retail users see retail pricing only.
-- Wholesale applicants do not see wholesale pricing until approved.
-- Approved wholesalers see only their assigned price list.
-- Server recalculates price and eligibility before submission.
-- Browser-submitted prices are never trusted.
-- Out-of-stock, hidden or ineligible products cannot be submitted.
-- Quantities must follow pack, MOQ and carton rules.
-- Orders preserve product and price snapshots.
-- Inventory is reserved only after owner confirmation unless explicitly configured otherwise.
-
-Suggested price model:
-- price_lists
-- product_prices
-- business_accounts.price_list_id
-
-Suggested statuses:
-- draft
-- submitted
-- compliance_review
-- awaiting_stock_confirmation
-- quote_sent
-- customer_accepted
-- confirmed
-- processing
-- packed
-- dispatched
-- delivered
-- rejected
-- cancelled
-
-CURRENT REPOSITORY STATE
-------------------------
-Status: VERIFIED
-
-- Repository: mkraja826/Gowthamfireworks
-- Visibility: Private
-- Default branch: main
-- Initial repository size: 0
-- Application code present: No
-- Permanent progress tracker: Present
-- Commerce and phone OTP architecture file: Present
-- Current implementation progress: Requirements only; no application code or database migration yet.
-
-OVERALL ROADMAP — 0% TO 100%
-----------------------------
-
-PHASE 0 — PROJECT FOUNDATION (0%–5%)
-Status: IN PROGRESS
-
-[COMPLETE] Locate and verify the correct GitHub repository.
-[COMPLETE] Create the permanent progress and build-history file.
-[COMPLETE] Record B2C, B2B and phone OTP architecture requirements.
-[PLANNED] Confirm final project name, branding and design direction.
-[PLANNED] Confirm Next.js, TypeScript and package manager.
-[PLANNED] Add README, licence decision, .gitignore and .env.example.
-[PLANNED] Establish development, staging and production workflow.
-[PLANNED] Define branch and commit strategy.
-[PLANNED] Connect the dedicated Supabase project safely.
-[PLANNED] Install Supabase Agent Skills in this repository.
-
-Exit criteria:
-- Clean repository foundation.
-- Stack confirmed.
-- Dedicated Supabase project connected.
-- No credentials committed.
-- Local setup documented and tested.
-
-PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
-Status: IN PROGRESS
-
-[COMPLETE] Define B2C versus B2B customer roles.
-[COMPLETE] Define phone OTP login requirement.
-[COMPLETE] Define wholesaler application and owner approval model.
-[COMPLETE] Define compliance-mode setting and safe default.
-[PLANNED] Audit the existing live website in detail.
-[PLANNED] Confirm exact business and legal wording with qualified counsel/licensing advisor.
-[PLANNED] Confirm licences held by factory and sales operation.
-[PLANNED] Confirm serviceable regions and transport process.
-[PLANNED] Confirm customer eligibility and age checks.
-[PLANNED] Confirm product categories and final product fields.
-[PLANNED] Finalise entity relationship design.
-[PLANNED] Finalise storage and compression strategy.
-[PLANNED] Define analytics, SEO and privacy requirements.
-[PLANNED] Freeze version-one acceptance criteria.
-
-Exit criteria:
-- Version-one requirements frozen.
-- Legal operating mode and wording approved.
-- Database and application architecture documented.
-- No unresolved critical business-flow ambiguity.
-
-PHASE 2 — DESIGN SYSTEM AND UX (12%–20%)
-Status: PLANNED
-
-- Premium Sivakasi night-festival visual direction.
-- Colours, typography, spacing, buttons and cards.
-- Desktop and mobile navigation.
-- Homepage and category screens.
-- Retail catalogue and product details.
-- Wholesale application and wholesale catalogue.
-- Retail and wholesale carts.
-- Phone OTP login and verification.
-- My Account and My Orders.
-- Admin login, dashboard, product editor and application review.
-- Loading, empty, error, suspended and unavailable states.
-- Accessibility and mobile usability review.
-
-Exit criteria:
-- Main public, customer, wholesaler and admin screens designed.
-- Mobile flow approved before full implementation.
-
-PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–31%)
-Status: PLANNED
-
-Identity and accounts:
+CORE DATA MODEL
+---------------
+Identity/access:
 - profiles
 - user_roles
+- admin_allowlist (optional bootstrap protection)
+- auth_audit_events
+
+Personal/business:
 - customer_addresses
 - business_accounts
 - business_account_members
@@ -323,7 +152,7 @@ Identity and accounts:
 - wholesale_documents
 - account_verification_history
 
-Catalogue and pricing:
+Catalogue/pricing:
 - categories
 - brands
 - products
@@ -333,7 +162,7 @@ Catalogue and pricing:
 - product_prices
 - inventory
 
-Ordering and operations:
+Orders/operations:
 - carts
 - cart_items
 - orders
@@ -348,225 +177,187 @@ Ordering and operations:
 - notifications
 - audit_logs
 
-Security tasks:
-- Enable RLS on exposed/protected tables.
-- Public read only for published retail catalogue fields.
-- Retail users access only their own data.
-- Wholesale applicants access only their own application.
-- Approved wholesalers access only their assigned wholesale pricing and their own data.
-- Protect customer phone numbers and wholesale documents.
-- Restrict catalogue, pricing, approvals and order-status changes to authorised admins.
-- Create storage policies.
-- Add server-side validation, constraints and indexes.
-- Version every migration and rollback plan.
+SECURITY REQUIREMENTS
+---------------------
+- OTP values never stored in application tables or logs.
+- Phone numbers normalised to E.164.
+- CAPTCHA, resend timer, expiry handling and rate limits.
+- Users cannot write their own admin role, approval status or price list.
+- Owner/admin role assigned only through protected operations.
+- Retail users access only their own profile, address, cart and orders.
+- Businesses access only their own application, documents and orders.
+- Approved wholesalers see only assigned wholesale pricing.
+- Wholesale documents remain private.
+- Browser-supplied roles, prices and approval status are never trusted.
+- Service-role credentials never appear in browser code.
+- High-risk admin actions require recent authentication and audit logging.
 
-Exit criteria:
-- Schema migrated and version controlled.
-- RLS policies tested for every role.
-- Anonymous users cannot modify protected data.
+OVERALL ROADMAP — 0% TO 100%
+----------------------------
 
-PHASE 4 — PHONE OTP AND ACCOUNT SHELL (31%–40%)
+PHASE 0 — PROJECT FOUNDATION (0%–5%)
+Status: IN PROGRESS
+
+[COMPLETE] Locate and verify repository.
+[COMPLETE] Create permanent progress record.
+[COMPLETE] Record B2C, B2B and phone OTP architecture.
+[COMPLETE] Record Personal/Business onboarding and direct admin routing.
+[PLANNED] Confirm framework and package manager.
+[PLANNED] Add README, .gitignore and .env.example.
+[PLANNED] Define branch, staging and production workflow.
+[PLANNED] Connect dedicated Supabase project safely.
+[PLANNED] Install Supabase Agent Skills.
+
+PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
+Status: IN PROGRESS
+
+[COMPLETE] Define B2C and B2B roles.
+[COMPLETE] Define phone OTP login.
+[COMPLETE] Define Personal and Business first-login profiles.
+[COMPLETE] Define direct pre-authorised admin login.
+[COMPLETE] Define wholesale application and approval.
+[COMPLETE] Define compliance-mode settings.
+[PLANNED] Audit existing live website.
+[PLANNED] Confirm licences, serviceable regions and transport process.
+[PLANNED] Confirm exact business/legal wording.
+[PLANNED] Confirm product fields, storage and entity relationship design.
+[PLANNED] Freeze version-one acceptance criteria.
+
+PHASE 2 — DESIGN SYSTEM AND UX (12%–20%)
 Status: PLANNED
 
-- Configure Supabase phone authentication.
-- Configure development SMS provider/test numbers safely.
-- Build phone-number entry and OTP verification.
-- Add resend, error, expiry and rate-limit states.
-- Create first-login profile flow.
-- Create retail account shell.
-- Create wholesale application shell.
-- Protect customer, wholesale and admin routes.
-- Add session handling and logout.
-- Add owner/admin allowlist and stronger admin recovery/second factor.
-- Complete production SMS and TRAI DLT configuration before launch.
+- Premium Sivakasi night-festival design.
+- Mobile/desktop navigation and landing page.
+- /login, OTP and account-type selection.
+- Personal onboarding.
+- Business onboarding and application status.
+- /admin/login and direct admin dashboard routing.
+- Retail/wholesale catalogues, carts and My Orders.
+- Admin product, pricing, application and order screens.
+- Loading, error, denied, pending, suspended and unavailable states.
 
-Exit criteria:
-- Phone OTP works in development and staging.
-- Every protected route enforces the correct role.
-- Admin access cannot be obtained by a normal verified customer.
+PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–31%)
+Status: PLANNED
+
+- Version-controlled schema and migrations.
+- profiles.account_type = personal/business only.
+- Protected user_roles for retail, applicant, wholesaler, staff and owner_admin.
+- Owner/admin bootstrap process.
+- RLS for every role and storage bucket.
+- Constraints, indexes, audit logs and rollback records.
+
+PHASE 4 — PHONE OTP, PROFILE AND ACCOUNT SHELL (31%–40%)
+Status: PLANNED
+
+- Configure development phone OTP and safe test numbers.
+- Build /login and /admin/login.
+- Build secure role/profile router.
+- Build Personal and Business onboarding.
+- Protect customer, wholesale and admin routes.
+- Session, logout, resend, expiry, abuse and recovery handling.
+- Admin second factor/recovery design.
+- Complete production SMS/DLT setup before launch.
 
 PHASE 5 — ADMIN PRODUCT, PRICE AND CATEGORY MANAGEMENT (40%–54%)
 Status: PLANNED
 
-Category management:
-- Create, edit, order, activate and hide categories.
-- Upload category image.
+- Category and brand management.
+- Product create, edit, draft, publish, hide and archive.
+- Product photos and primary image.
+- Retail MRP/price and wholesale price lists.
+- MOQ, carton quantity and channel availability.
+- Stock, low-stock threshold and bulk availability update.
 
-Product management:
-- Add, edit, draft, publish, hide and archive product.
-- Product name, slug, category, brand and description.
-- Retail and wholesale visibility.
-- Retail MRP and price.
-- Wholesale price lists.
-- MOQ and carton quantity.
-- Retail and wholesale availability.
-- Stock and low-stock threshold.
-- Featured, green and low-sound flags where accurate.
-- Search, filter and bulk availability update.
-
-Exit criteria:
-- Owner independently manages all public and wholesale product data without code changes.
-
-PHASE 6 — IMAGE AND DOCUMENT MANAGEMENT (54%–61%)
+PHASE 6 — IMAGE AND BUSINESS DOCUMENT MANAGEMENT (54%–61%)
 Status: PLANNED
 
-- Secure product image upload.
-- Secure wholesale document upload.
-- Type and file-size validation.
-- Product image compression and WebP output where supported.
-- Thumbnail generation.
-- Multiple product images and primary-image selection.
-- Reordering and safe deletion.
+- Secure image/document upload.
+- Validation, compression, WebP and thumbnails.
+- Multiple images, ordering and safe deletion.
+- Private business-document policies.
 - Prevent orphaned files.
-- Upload progress and error handling.
-- Private access policies for wholesale documents.
-- CDN-friendly product image caching.
-
-Exit criteria:
-- Product images are fast and manageable.
-- Wholesale documents are private and owner-access controlled.
 
 PHASE 7 — PUBLIC LANDING PAGE (61%–69%)
 Status: PLANNED
 
-- Legal/compliance announcement.
-- Premium hero section.
-- Retail and wholesale entry calls to action.
-- Categories, featured products and combo packs.
-- Factory-to-customer and factory-to-wholesaler explanation.
-- Business story, trust, service region, safety and contact sections.
-- Reviews only when authentic and approved.
+- Premium hero, categories, featured products and combo packs.
+- Personal/B2C and Business/B2B entry points.
+- Factory story, service regions, trust, safety and contact.
 - Responsive mobile navigation.
-
-Exit criteria:
-- Homepage represents both customer channels accurately.
-- Core content loads quickly on mobile.
-- Every call to action reaches a working flow.
 
 PHASE 8 — RETAIL AND WHOLESALE CATALOGUES (69%–78%)
 Status: PLANNED
 
-- Retail catalogue grid, search and filters.
-- Product details, related products and WhatsApp share.
-- Wholesale-only catalogue after approval.
-- Assigned wholesale price list.
-- MOQ and carton quantity display.
-- Retail and wholesale channel availability.
-- Prevent unpublished, hidden or unauthorised data exposure.
-- Product URLs and metadata.
-
-Exit criteria:
-- Retail and wholesale users see only the correct catalogue and pricing.
+- Public retail catalogue and product pages.
+- Approved wholesale catalogue and assigned pricing.
+- Search, filters, MOQ, carton and channel availability.
+- Prevent hidden or unauthorised data exposure.
 
 PHASE 9 — CARTS, QUOTES AND REQUEST/ORDER FLOW (78%–87%)
 Status: PLANNED
 
 - Separate retail and wholesale carts.
-- Quantity, pack, MOQ and carton validation.
-- Persistent cart across navigation.
-- Server-side price and eligibility recalculation.
-- Address and required customer details.
-- Immutable product and price snapshots.
-- Quote/request submission.
-- WhatsApp-readable summary.
-- Confirmation screen and My Orders tracking.
-- Spam and duplicate-submission prevention.
-- Compliance-mode enforcement.
+- Server-side price, role, pack, MOQ and carton validation.
+- Addresses, immutable snapshots and request submission.
+- WhatsApp summary, confirmation and My Orders tracking.
+- Spam prevention and compliance-mode enforcement.
 
-Exit criteria:
-- Complete B2C and B2B request/order journeys work on mobile and desktop.
-- Retail and wholesale data cannot be mixed.
-- Production cannot silently complete an unapproved online sale.
-
-PHASE 10 — ADMIN APPLICATION AND ORDER MANAGEMENT (87%–92%)
+PHASE 10 — ADMIN BUSINESS AND ORDER MANAGEMENT (87%–92%)
 Status: PLANNED
 
-- Wholesale application list and detail view.
-- Review documents and licence information.
-- Approve, reject, request correction, suspend and expire wholesaler.
+- Review business profiles, documents and licence data.
+- Approve, reject, request correction, suspend and expire.
 - Assign wholesale price list.
-- Separate B2C and B2B order/request views.
-- Stock and compliance verification.
-- Quote revision with audit history.
-- Call and WhatsApp actions.
-- Status history and reporting/export.
-- Licence-expiry warnings.
-
-Exit criteria:
-- Owner processes wholesale approvals and both customer channels without direct database access.
+- Separate B2C/B2B order views.
+- Stock/compliance review, quote revision, status history and exports.
 
 PHASE 11 — SETTINGS, SEO, NOTIFICATIONS AND ANALYTICS (92%–95%)
 Status: PLANNED
 
-- Contact, WhatsApp, address and region settings.
-- Compliance mode and legal wording settings.
-- Retail and wholesale minimum-order settings.
-- Homepage featured-content controls.
-- SMS/WhatsApp notification settings.
-- SEO titles, descriptions, canonical URLs, sitemap and robots.
-- Accurate structured data and social metadata.
-- Privacy-friendly analytics and Search Console.
-- Broken-link checks.
-
-Exit criteria:
-- Website is configurable, indexable, shareable and measurable.
+- Contact, region, compliance and minimum-order settings.
+- SMS/WhatsApp notifications.
+- SEO, sitemap, robots, social metadata and analytics.
 
 PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
 Status: PLANNED
 
-- Public, account, wholesale and admin functional tests.
-- RLS tests for guest, retail, applicant, wholesaler and admin roles.
-- OTP, session, resend, abuse and recovery tests.
-- Price-list isolation tests.
-- Cart and immutable snapshot tests.
-- Image and private-document tests.
-- Mobile, desktop and slow-network tests.
-- Accessibility, performance and security-header review.
-- Backup and rollback validation.
-- Confirm no secret exists in client code or Git history.
-
-Exit criteria:
-- No known critical defect.
-- Production release and security checklist passes.
+- Functional tests for every route and role.
+- OTP, role escalation, RLS and price-isolation tests.
+- Image/private-document, cart and snapshot tests.
+- Mobile, desktop, slow-network, accessibility and security review.
+- Backup, rollback and secret-history verification.
 
 PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
 Status: PLANNED
 
-- Configure production secrets securely.
-- Configure Cloudflare and staging deployment.
-- Complete staging acceptance tests for every role.
-- Preserve/back up the current live website.
-- Complete legal, licence, service-region and SMS/DLT launch checks.
-- Configure production domain and HTTPS.
-- Deploy production build.
-- Verify landing page, catalogues, phone OTP, accounts, admin and both request/order flows.
-- Verify production RLS and storage policies.
-- Verify analytics, sitemap and Search Console.
-- Record production commit and deployment details.
-- Prepare rollback procedure and monitor initial errors.
+- Staging deployment and acceptance tests for every role.
+- Preserve current live website.
+- Complete legal, licence, service-region and SMS/DLT checks.
+- Production domain, HTTPS and deployment.
+- Verify landing, catalogue, login, profiles, admin and B2C/B2B flows.
+- Verify RLS, storage, analytics, sitemap and rollback procedure.
 
-100% completion definition:
-- Public website is live on the intended domain.
-- Owner manages photos, retail/wholesale prices, MOQ, carton quantities and channel availability from admin.
-- Customers log in using phone OTP.
-- Retail customers use the B2C path.
-- Approved wholesalers use the B2B path.
-- Owner reviews and processes requests/orders safely.
-- Security, mobile performance, documentation, backups and production verification are complete.
+100% COMPLETION DEFINITION
+--------------------------
+- Public website live on intended domain.
+- New customer can choose Personal or Business after OTP.
+- Returning users route correctly without repeating onboarding.
+- Pre-authorised admin logs in directly and securely.
+- Owner manages catalogue, pricing, availability, businesses and requests without code changes.
+- Retail and approved wholesale experiences remain isolated.
+- Security, performance, documentation, backups and production verification complete.
 
 PROGRESS SUMMARY
 ----------------
 Overall: 2%
 
 Completed:
-- Correct private repository located and verified.
-- Permanent 0-to-100 project tracker created.
-- B2C factory-to-customer requirement recorded.
-- B2B factory-to-wholesaler requirement recorded.
-- Phone-number and OTP login requirement recorded.
-- Wholesale owner-approval and price-isolation architecture recorded.
-- Compliance-first configurable order model recorded.
-- Detailed architecture file added under docs/.
+- Correct private repository verified.
+- Permanent tracker created.
+- B2C/B2B, OTP, wholesale approval and compliance architecture recorded.
+- Personal/Business first-login profile routing recorded.
+- Direct pre-authorised admin login recorded.
+- Detailed architecture maintained in docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt.
 
 In progress:
 - Project foundation.
@@ -574,11 +365,11 @@ In progress:
 - Stack confirmation.
 - Requirements and legal operating model.
 
-Next planned milestone:
-- Connect only the dedicated Gowtham Fireworks Supabase project.
+Next milestone:
+- Connect only the Gowtham Fireworks Supabase project.
 - Confirm Next.js, TypeScript and package manager.
-- Add repository foundation files without committing secrets.
-- Create the first version-controlled database schema and RLS plan.
+- Add foundation files without secrets.
+- Create first schema and RLS migration.
 
 BUILD AND CHANGE HISTORY
 ------------------------
@@ -588,129 +379,88 @@ Date: 24 July 2026
 Progress: 0% -> 1%
 Status: COMPLETE
 Changes:
-- Located repository mkraja826/Gowthamfireworks.
-- Verified that it is private and uses main as the default branch.
-- Verified that it was empty before development began.
-- Added PROJECT_PROGRESS_0_TO_100.txt as the permanent build record.
-Reason:
-- Preserve the complete project journey and prevent loss of context across development sessions.
+- Located private repository mkraja826/Gowthamfireworks.
+- Verified main branch and empty starting state.
+- Added this permanent tracker.
 Verification:
-- File creation committed to main.
-- Initial commit SHA: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc.
+- Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
 
 Entry 002
 Date: 24 July 2026
 Progress: 1% -> 2%
-Status: COMPLETE — architecture record only; application not implemented
+Status: COMPLETE — architecture only; application not implemented
 Changes:
-- Approved one website serving B2C factory-to-customer and B2B factory-to-wholesaler paths.
-- Approved phone-number and OTP login through Supabase Auth.
-- Defined retail customer, wholesale applicant, approved wholesaler and owner/admin roles.
-- Defined owner approval before wholesale prices become visible.
-- Defined channel-specific pricing, MOQ, carton quantities and availability.
-- Defined separate retail and wholesale carts and order records.
-- Defined compliance-mode settings with safe default behaviour.
+- Approved B2C and B2B platform.
+- Approved phone OTP.
+- Defined wholesale approval, price isolation, separate carts and compliance modes.
 - Added docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt.
-- Updated this permanent tracker.
-Reason:
-- Freeze the major business and authentication requirements before database or frontend implementation.
 Verification:
-- Architecture file committed to main.
-- Architecture commit SHA: fbc8fcafd6c53a23e2a18c4981e120021c9bcdb4.
-- No application code or production database change was made.
+- Architecture commit: fbc8fcafd6c53a23e2a18c4981e120021c9bcdb4
+- Tracker update commit: f6056708b043de52bffbc1c76700532530fcb7a9
+
+Entry 003
+Date: 24 July 2026
+Progress: remains 2%
+Status: COMPLETE — architecture decision only; application not implemented
+Changes:
+- First-time customer chooses Personal or Business after OTP.
+- Personal creates active retail profile.
+- Business creates pending wholesale application.
+- Admin removed from all public account-type choices.
+- Added separate /admin/login for pre-authorised admin users.
+- Defined direct role-based routing to /admin.
+- Defined server routing precedence and role-escalation protections.
+- Updated detailed architecture and permanent tracker.
+Verification:
+- Architecture update commit: e67f4d2bf9cb67785c6b20fe5d4fbc3fea2bde74
+- No application code or database migration changed.
 
 DECISION LOG
 ------------
 
-Decision 001
-Date: 24 July 2026
-Decision: Maintain one permanent 0-to-100 progress file in the repository.
-Reason: Preserve architecture, implementation, failures, fixes, tests and deployment history.
-Status: APPROVED
-
-Decision 002
-Date: 24 July 2026
-Decision: Owner controls product photos, prices and availability through a secure admin page.
-Reason: Routine catalogue operation must not require developer involvement.
-Status: APPROVED
-
-Decision 003
-Date: 24 July 2026
-Decision: Use a separate Supabase account/project for Gowtham Fireworks and never reuse CapDent or Astro data resources.
-Reason: Data isolation, security and maintainability.
-Status: APPROVED
-
-Decision 004
-Date: 24 July 2026
-Decision: Serve both B2C factory-to-customer and B2B factory-to-wholesaler customers in one platform.
-Reason: One catalogue and admin system can support separate customer journeys while sharing product and inventory management.
-Status: APPROVED
-
-Decision 005
-Date: 24 July 2026
-Decision: Use phone number plus OTP as the primary login method.
-Reason: Mobile-first access with verified customer contact information and no password burden.
-Status: APPROVED
-
-Decision 006
-Date: 24 July 2026
-Decision: Wholesale prices and wholesale-only catalogue data remain hidden until owner approval.
-Reason: Protect commercial pricing and restrict B2B access to verified businesses.
-Status: APPROVED
-
-Decision 007
-Date: 24 July 2026
-Decision: Keep production order behaviour configurable and launch in enquiry/manual-confirmation mode unless the exact online transaction model receives legal approval.
-Reason: Fireworks sales, possession, transport and online-sale wording are legally sensitive and location dependent.
-Status: APPROVED
+Decision 001 — Keep one permanent 0-to-100 tracker. APPROVED.
+Decision 002 — Owner controls photos, prices and availability through admin. APPROVED.
+Decision 003 — Use dedicated Supabase project/account. APPROVED.
+Decision 004 — Serve B2C and B2B in one platform. APPROVED.
+Decision 005 — Use phone number plus OTP. APPROVED.
+Decision 006 — Hide wholesale pricing until owner approval. APPROVED.
+Decision 007 — Launch in enquiry/manual-confirmation mode unless exact transaction model is legally approved. APPROVED.
+Decision 008 — First-time customers choose Personal or Business; pre-authorised admins bypass customer onboarding and log directly into /admin; Admin is never a public choice. APPROVED.
 
 OPEN DECISIONS
 --------------
-- Confirm Next.js and TypeScript as final framework.
-- Confirm npm, pnpm or another package manager.
-- Confirm Cloudflare Workers or Pages deployment mode.
-- Confirm Supabase Storage versus Cloudflare R2 for final product images.
-- Select production SMS provider.
-- Complete applicable TRAI DLT registration and OTP template approval.
-- Confirm exact licences held by factory and sales entities.
-- Confirm whether B2C delivery is permitted for each intended location and method.
-- Confirm B2B document and licence requirements.
-- Confirm age and identity verification requirements.
-- Confirm serviceable regions, minimum values, taxes, transport terms and returns/cancellation rules.
-- Confirm whether the current live website remains active until staging passes.
+- Confirm Next.js, TypeScript and package manager.
+- Confirm Cloudflare deployment mode.
+- Confirm final product image storage.
+- Select production SMS provider and complete applicable DLT setup.
+- Confirm licences, service regions, transport, age/identity requirements and B2B documents.
+- Confirm taxes, minimum values, cancellations/returns and current-site cutover approach.
 
 KNOWN RISKS
 -----------
-- PESO publicly states a ban on online sale of fireworks in compliance with Supreme Court directions; production wording and transaction flow require specialist legal review.
-- B2B status does not automatically remove licensing, possession, storage or transport obligations.
-- SMS OTP in India requires suitable provider configuration and applicable TRAI DLT registration.
-- OTP endpoints can be abused without CAPTCHA and rate limits.
-- Misconfigured RLS could expose wholesale pricing, customer phone numbers or business documents.
-- Product images can cause high storage and bandwidth usage without compression.
-- Wholesale documents require private storage and strict access policies.
-- Browser-supplied prices must never be trusted.
-- Replacing the existing website before staging verification could interrupt the business.
+- Fireworks ordering, possession, transport and online-sale wording require specialist legal review.
+- B2B status does not remove licence or transport obligations.
+- OTP endpoints require CAPTCHA, rate limits and DLT/provider configuration.
+- Incorrect RLS could expose phones, pricing or private documents.
+- Public account onboarding must never allow role escalation.
+- Browser-supplied roles and prices cannot be trusted.
+- Images require compression and storage controls.
+- Replacing the current site before staging verification could interrupt business.
 
-SECURITY AND SECRET-HANDLING RECORD
------------------------------------
+SECRET-HANDLING RECORD
+----------------------
 Never commit:
-- Supabase service-role key.
-- Database password.
-- SMS provider token or secret.
-- OTP values.
-- Personal access token.
-- Cloudflare API token.
-- Private signing secret.
-- Wholesale licence documents.
-- Customer personal-data exports.
-- Production .env file.
+- Supabase service-role key or database password.
+- SMS provider token/secret or OTP values.
+- GitHub/Cloudflare tokens.
+- Production .env.
+- Customer exports or private business/licence documents.
 
 Safe pattern:
-- Commit .env.example with variable names only.
-- Store real values in local environment files and hosting/Supabase secrets.
-- Use publishable Supabase keys only with correctly tested RLS.
-- Keep service-role credentials on trusted server-side infrastructure only.
-- Keep wholesale documents in a private storage bucket.
+- Commit .env.example with names only.
+- Keep real values in local/hosting/Supabase secrets.
+- Keep service-role credentials server-side only.
+- Keep business documents in a private bucket.
 
 SESSION HANDOVER TEMPLATE
 -------------------------
@@ -726,4 +476,4 @@ Known issue or blocker:
 Exact next step:
 
 END OF PERMANENT PROJECT RECORD
-===============================
+==============================
