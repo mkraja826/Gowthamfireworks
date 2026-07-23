@@ -7,12 +7,12 @@ Default branch: main
 Repository visibility: Private
 Record created: 24 July 2026
 Last updated: 24 July 2026
-Current overall progress: 3%
-Current phase: Phase 0 — Project foundation and requirements definition
+Current overall progress: 16%
+Current phase: Foundation, design system and first application implementation
 
-PURPOSE OF THIS FILE
---------------------
-This is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
+PURPOSE
+-------
+This file is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
 
 Update it after every meaningful architecture decision, database migration, code change, test, deployment, failure, fix or milestone so the project can always be resumed without losing how it was built.
 
@@ -20,7 +20,7 @@ MAINTENANCE RULES
 -----------------
 1. Never mark implementation COMPLETE until it is built and verified.
 2. Record exact files, migrations, routes, services and commits whenever possible.
-3. Preserve failures and fixes instead of deleting their history.
+3. Preserve failures and fixes instead of deleting history.
 4. Never store passwords, service-role keys, API secrets, access tokens, OTP values or customer data here.
 5. Keep the existing live website stable while the replacement is developed and tested separately.
 6. Use PLANNED, IN PROGRESS, BLOCKED and COMPLETE consistently.
@@ -33,7 +33,7 @@ Build a premium mobile-first Gowtham Fireworks Industries platform serving:
 - B2C: factory to personal/retail customer.
 - B2B: factory to approved business/wholesaler.
 
-The owner must control products, photos, categories, retail and wholesale pricing, MOQ, carton quantities, availability, stock, customer requests, business applications, orders, offers and website settings without editing code.
+The owner must control products, photos, categories, retail and wholesale pricing, MOQ, carton quantities, availability, stock, customer requests, business applications, offers and website settings without editing code.
 
 CONFIRMED PRODUCT DIRECTION
 ---------------------------
@@ -42,482 +42,421 @@ Status: APPROVED
 1. Premium public landing page and searchable catalogue.
 2. One application with separate Personal/B2C and Business/B2B paths.
 3. Phone-number and OTP authentication.
-4. Use Supabase Test OTP during development and staging until a production SMS provider is configured.
-5. First-time customer chooses Personal or Business only after successful OTP verification.
+4. Supabase Test OTP during development and staging.
+5. First-time customer chooses Personal or Business after OTP verification.
 6. Personal creates an active retail profile.
 7. Business creates a business profile and pending wholesale application.
 8. Wholesale prices remain hidden until owner approval.
-9. Admin is never shown as a public account-type choice.
-10. Pre-authorised owner/admin users log in through /admin/login and go directly to /admin after role verification.
+9. Admin is never shown as a public account-type option.
+10. Pre-authorised owner/admin users use /admin/login and route directly to /admin after role verification.
 11. Normal customers cannot promote themselves to admin.
-12. Owner controls every product photo, price, stock and availability from a secure admin panel.
-13. Dedicated Supabase account/project; never mix data with CapDent, Astro or another project.
-14. Production ordering uses a compliance-first configuration.
-15. Default launch behaviour is enquiry/order request plus manual owner confirmation.
-16. Visual direction is “Sivakasi Midnight Festival”: premium night atmosphere, vivid authentic product packaging and clean readable commerce surfaces.
-17. Public experience is celebratory; admin experience is calm, light, fast and operational.
+12. Owner controls every product photo, retail price, wholesale price, stock and availability from admin.
+13. Dedicated Supabase project/account; never mix data with CapDent, Astro or another project.
+14. Production ordering uses compliance-first configuration.
+15. Default launch behaviour is enquiry/order-request plus manual owner confirmation.
+16. No payment gateway is included in version one.
+17. Visual direction is “Sivakasi Midnight Festival”.
+18. Public UI is celebratory; admin UI is calm, light and operational.
+
+TECHNICAL STACK
+---------------
+Status: SELECTED AND SCAFFOLDED
+
+- Framework: Next.js App Router with TypeScript.
+- React: React 19 dependency range.
+- Package manager: npm.
+- Styling: custom responsive CSS design system.
+- Database: Supabase PostgreSQL.
+- Authentication: Supabase Auth phone OTP.
+- Development authentication: Supabase Test OTP.
+- Authorization: Supabase Row Level Security plus trusted server checks.
+- Supabase browser integration: @supabase/ssr.
+- Product images: public Supabase Storage bucket.
+- Business documents: private Supabase Storage bucket.
+- Hosting/CDN: Cloudflare planned; deployment mode not yet configured.
+
+IMPLEMENTED ROUTES
+------------------
+Public and customer:
+- /
+- /catalogue
+- /catalogue/[slug]
+- /cart
+- /login
+- /wholesale
+- /onboarding/account-type
+- /onboarding/personal
+- /business/apply
+
+Admin:
+- /admin/login
+- /admin
+- /admin/products
+- /admin/applications
+- /admin/requests
+
+IMPLEMENTED PUBLIC EXPERIENCE
+-----------------------------
+Status: FIRST WORKING UI FOUNDATION COMPLETE; LIVE DATA NOT CONNECTED
+
+- Sticky responsive header.
+- Announcement/compliance bar.
+- Premium hero with Retail and Wholesale paths.
+- Personal versus Business buying cards.
+- Category cards.
+- Featured product cards.
+- How-it-works steps.
+- Factory story placeholder content.
+- Safety section.
+- Final calls to action.
+- Professional footer.
+- Mobile navigation.
+- Reduced-motion support.
+- Retail catalogue search and category filters.
+- Product detail pages.
+- Availability states.
+- Browser-local retail cart with quantity changes and subtotal.
+- Requirement/manual-confirmation wording.
+
+Current catalogue data:
+- Uses lib/demo-data.ts placeholders until Supabase is applied and public catalogue queries replace demo data.
+- Real product photographs and verified business claims have not been inserted.
 
 AUTHENTICATION AND PROFILE ROUTING
 ----------------------------------
-Status: APPROVED; NOT IMPLEMENTED
+Status: CLIENT FOUNDATION IMPLEMENTED; DATABASE NOT APPLIED
 
-Customer route:
-- /login
-- Enter phone number and OTP.
-- Development/staging initially uses Supabase Test OTP.
-- After OTP, server reads role and profile.
-- Existing users go directly to their correct account area.
-- New users choose Personal or Business.
+Customer login:
+- /login requests and verifies Supabase phone OTP.
+- First-time authenticated users route to /onboarding/account-type.
+- Personal routes to /onboarding/personal.
+- Business routes to /business/apply.
+- Existing personal users route to retail catalogue.
+- Existing business users route to wholesale area.
 
-First-time Personal result:
-- profiles.account_type = personal
-- role = retail_customer
-- status = active
-- retail access available immediately, subject to operating rules.
+Admin login:
+- /admin/login requests and verifies phone OTP.
+- Reads protected user_roles after verification.
+- owner_admin or staff routes to /admin.
+- Non-admin verified users are signed out and denied.
+- Admin is never a public profile choice.
 
-First-time Business result:
-- profiles.account_type = business
-- role = wholesale_applicant
-- business status = pending_review
-- wholesale pricing unavailable until owner approval.
+Remaining authentication work:
+- Apply Supabase schema.
+- Configure safe test phone numbers and OTP values.
+- Add local environment values.
+- Add server-side session refresh and route guards.
+- Verify direct URL protection.
+- Add production admin recovery/second-factor strategy.
 
-Admin route:
-- /admin/login
-- Only pre-authorised owner_admin or staff identities are accepted.
-- owner_admin redirects directly to /admin.
-- staff redirects only to allowed admin sections.
-- non-admin authenticated users are denied.
-- no public Admin signup or Admin option exists.
+IMPLEMENTED PERSONAL AND BUSINESS EXPERIENCE
+--------------------------------------------
+Status: CLIENT FOUNDATION COMPLETE; REQUIRES SUPABASE
 
-Server routing priority:
-1. owner_admin -> /admin
-2. staff -> authorised admin area
-3. existing personal -> /account or prior retail destination
-4. approved business -> /wholesale
-5. pending business -> /business/application-status
-6. rejected/suspended/expired business -> relevant status page
-7. no profile -> /onboarding/account-type
+Personal:
+- Account-type selection.
+- Short personal onboarding form.
+- complete_personal_onboarding RPC call.
 
-Detailed authentication/commerce record:
-- docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt
+Business:
+- Wholesale information page.
+- Business application form.
+- Business name, contact, GST, address, licence and expected-volume fields.
+- complete_business_onboarding RPC call.
+- Owner approval required before wholesale role/pricing.
 
-THEME, CONTENT AND UI/UX DIRECTION
----------------------------------
-Status: APPROVED FOR PLANNING; NOT IMPLEMENTED
+IMPLEMENTED ADMIN EXPERIENCE
+----------------------------
+Status: FIRST OPERATIONAL UI FOUNDATION COMPLETE; REQUIRES SUPABASE AND ROUTE HARDENING
 
-Detailed record:
-- docs/WEBSITE_THEME_CONTENT_UI_UX_FEATURE_PLAN.txt
+- Separate owner login.
+- Dark compact sidebar and light workspace.
+- Dashboard metric cards and quick actions.
+- Product management page.
+- Add-category action.
+- Product name, slug, category, description and pack size.
+- Product photo upload.
+- Retail MRP and selling price.
+- Retail availability.
+- Wholesale price, MOQ and carton quantity.
+- Wholesale availability.
+- Stock quantity and low-stock threshold.
+- Draft/active/archived status.
+- Publish toggle.
+- Product list query.
+- Product image upload to product-images bucket.
+- Business application and request placeholder screens.
 
-Theme:
-- “Sivakasi Midnight Festival”.
-- Midnight navy and indigo atmosphere.
-- Festival gold, ember orange and selective crimson accents.
-- Warm ivory/white product and form surfaces.
-- Product photography remains visually dominant.
-- Avoid casino, gaming, cluttered discount-poster and generic black/gold-template styling.
-
-Public homepage order:
-1. Compliance/announcement bar.
-2. Hero with Retail and Wholesale primary paths.
-3. Personal versus Business buying cards.
-4. Shop by category.
-5. Featured products.
-6. Celebration packs.
-7. Active admin-controlled offer.
-8. How Retail and Wholesale work.
-9. Verified trust points.
-10. Factory story and real photography.
-11. Brands.
-12. Service regions.
-13. Safety guidance.
-14. Authentic reviews.
-15. Final CTA and professional footer.
-
-Primary UX rules:
-- Mobile-first layout.
-- Fast search and filters.
-- Separate retail and wholesale carts.
-- Wholesale pricing never returned to unauthorised users.
-- Clear availability, pack, MOQ and carton rules.
-- Sticky mobile add/cart controls where useful.
-- No full-screen repetitive popup unless required.
-- No expired countdown or fake scarcity.
-- Changing claims, offers and regions controlled from admin.
-- No exposed public Admin link or admin email.
-
-Admin design:
-- Light neutral operational workspace.
-- Compact dark sidebar.
-- Minimal decorative fireworks.
-- Clear tables, forms, status colours and quick actions.
-- Product editor separates Basic Info, Images, Retail, Wholesale, Inventory, SEO and Publish.
-- Audit price, role, approval and status changes.
+Remaining admin work:
+- Server-side route guard.
+- Edit and archive existing products.
+- Atomic/transactional product creation.
+- Image compression and thumbnails.
+- Multiple images, ordering and safe deletion.
+- Business application approve/reject/correction actions.
+- Wholesale price-list assignment.
+- Request status management.
+- Offers/content/settings editor.
+- Audit-log UI.
+- Reports/export.
 
 COMMERCE AND COMPLIANCE MODE
 ----------------------------
 Status: APPROVED ARCHITECTURE; LEGAL OPERATING REVIEW REQUIRED
 
-- ENQUIRY_ONLY: customer submits a request; no completed online sale.
-- MANUAL_CONFIRMATION: owner checks customer, location, licence where applicable, stock, transport and eligibility.
-- LICENSED_ORDERING: disabled until written legal/compliance approval for the exact model and service regions.
+Modes:
+- ENQUIRY_ONLY: customer submits a requirement; no completed online sale.
+- MANUAL_CONFIRMATION: owner checks customer, stock, location, licence where applicable, transport and eligibility.
+- LICENSED_ORDERING: disabled until written legal/compliance approval for the exact model and regions.
 
 Default launch mode:
 - ENQUIRY_ONLY / MANUAL_CONFIRMATION
 
-No payment gateway or automatic dispatch promise is enabled merely because the software supports carts and order records.
+No payment gateway or automatic dispatch promise is enabled merely because the software supports carts and request records.
 
-TECHNICAL DIRECTION
--------------------
-Status: PROPOSED — confirm during foundation implementation
-
-- Frontend/admin: Next.js with TypeScript.
-- Styling: Tailwind CSS or equivalent maintainable design system.
-- Database: Supabase PostgreSQL.
-- Authentication: Supabase Auth phone OTP.
-- Development OTP: Supabase Test OTP.
-- Authorization: Supabase Row Level Security plus trusted server checks.
-- Production SMS: supported provider or Supabase Send SMS Hook after provider/DLT setup.
-- Storage: Supabase Storage initially for product images and private business documents.
-- Hosting/CDN: Cloudflare.
-- Public app, account area and admin may share one application.
-
-CORE USER TYPES
+SUPABASE SCHEMA
 ---------------
-- guest
-- retail_customer
-- wholesale_applicant
-- wholesaler
-- staff
-- owner_admin
+Status: CODED IN REPOSITORY; NOT EXECUTED OR VERIFIED AGAINST A PROJECT
 
-Roles are enforced in database policies and server logic, never only by hiding UI.
+File:
+- supabase/schema.sql
 
-CORE DATA MODEL
----------------
-Identity/access:
+Schema includes:
 - profiles
 - user_roles
-- admin_allowlist (optional bootstrap protection)
+- admin_allowlist
 - auth_audit_events
-
-Personal/business:
 - customer_addresses
 - business_accounts
-- business_account_members
 - wholesale_applications
 - wholesale_documents
-- account_verification_history
-
-Catalogue/pricing:
 - categories
 - brands
+- price_lists
 - products
 - product_images
 - product_channel_settings
-- price_lists
 - product_prices
 - inventory
-
-Orders/operations:
 - carts
 - cart_items
 - orders
 - order_items
 - order_status_history
-- quotes
-- quote_items
-- inventory_reservations
 - delivery_regions
 - site_settings
-- compliance_settings
-- notifications
+- offers
 - audit_logs
 
-SECURITY REQUIREMENTS
----------------------
-- OTP values never stored in application tables or logs.
-- Phone numbers normalised to E.164.
-- Production OTP uses CAPTCHA, resend timer, expiry handling and rate limits.
-- Test OTP is restricted to development/staging and test numbers.
-- Users cannot write their own admin role, approval status or price list.
-- Owner/admin role assigned only through protected operations.
-- Retail users access only their own profile, address, cart and orders.
-- Businesses access only their own application, documents and orders.
-- Approved wholesalers see only assigned wholesale pricing.
-- Wholesale documents remain private.
-- Browser-supplied roles, prices and approval status are never trusted.
-- Service-role credentials never appear in browser code.
-- High-risk admin actions require recent authentication and audit logging.
+Schema also includes:
+- auth.users profile trigger.
+- Admin allowlist bootstrap.
+- Personal onboarding RPC.
+- Business onboarding RPC.
+- Role helper functions.
+- Row Level Security policies.
+- Public product-image bucket.
+- Private business-document bucket.
+- Retail and wholesale seed price lists.
+- Initial category seed data.
+- Compliance-first site setting.
+- Commented owner bootstrap SQL.
 
-OVERALL ROADMAP — 0% TO 100%
-----------------------------
+Do not run this schema in CapDent, Astro or another project.
+
+VALIDATION STATUS
+-----------------
+Status: PARTIAL
+
+Completed:
+- TypeScript/TSX source was parsed with the available global TypeScript compiler.
+- No syntax/parse errors were found in project source files.
+- Missing-module errors were expected because project dependencies were not installed in the execution environment.
+- Repository commits were created and verified through GitHub.
+
+Not completed:
+- npm install.
+- npm run typecheck with installed packages.
+- npm run lint.
+- npm run build.
+- Browser visual test.
+- Supabase SQL execution.
+- RLS test matrix.
+- OTP login test.
+- Image upload test.
+- Cloudflare deployment.
+
+Reason:
+- npm registry requests timed out in the available execution environment.
+
+CURRENT REPOSITORY FILES ADDED
+------------------------------
+Foundation:
+- package.json
+- tsconfig.json
+- next-env.d.ts
+- next.config.ts
+- eslint.config.mjs
+- .gitignore
+- .env.example
+- README.md
+
+Application:
+- app/layout.tsx
+- app/globals.css
+- app/page.tsx
+- app/catalogue/page.tsx
+- app/catalogue/[slug]/page.tsx
+- app/cart/page.tsx
+- app/login/page.tsx
+- app/wholesale/page.tsx
+- app/onboarding/account-type/page.tsx
+- app/onboarding/personal/page.tsx
+- app/business/apply/page.tsx
+- app/admin/login/page.tsx
+- app/admin/(dashboard)/layout.tsx
+- app/admin/(dashboard)/page.tsx
+- app/admin/(dashboard)/products/page.tsx
+- app/admin/(dashboard)/applications/page.tsx
+- app/admin/(dashboard)/requests/page.tsx
+
+Components and libraries:
+- components/cart-provider.tsx
+- components/site-header.tsx
+- components/site-footer.tsx
+- components/product-card.tsx
+- components/phone-otp-form.tsx
+- lib/types.ts
+- lib/demo-data.ts
+- lib/format.ts
+- lib/supabase/client.ts
+
+Supabase:
+- supabase/schema.sql
+- supabase/README.md
+
+ROADMAP — 0% TO 100%
+---------------------
 
 PHASE 0 — PROJECT FOUNDATION (0%–5%)
-Status: IN PROGRESS
+Status: COMPLETE FOR FIRST SCAFFOLD
 
-[COMPLETE] Locate and verify repository.
-[COMPLETE] Create permanent progress record.
-[COMPLETE] Record B2C, B2B and phone OTP architecture.
-[COMPLETE] Record Personal/Business onboarding and direct admin routing.
-[COMPLETE] Record theme, content, UI/UX and feature plan.
-[COMPLETE] Select Supabase Test OTP for development.
-[PLANNED] Confirm framework and package manager.
-[PLANNED] Add README, .gitignore and .env.example.
-[PLANNED] Define branch, staging and production workflow.
-[PLANNED] Connect dedicated Supabase project safely.
-[PLANNED] Install Supabase Agent Skills.
-
-Exit criteria:
-- Clean repository foundation.
-- Stack confirmed.
-- Dedicated Supabase project connected.
-- No credentials committed.
-- Local setup documented and verified.
+[COMPLETE] Locate repository and create permanent tracker.
+[COMPLETE] Select Next.js, TypeScript and npm.
+[COMPLETE] Add config, README, .gitignore and .env.example.
+[COMPLETE] Preserve secret-handling rules.
+[PLANNED] Install dependencies and commit package-lock.json.
+[PLANNED] Confirm Cloudflare staging/production workflow.
 
 PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
-Status: IN PROGRESS
+Status: SUBSTANTIALLY DOCUMENTED; BUSINESS CONFIRMATIONS REMAIN
 
-[COMPLETE] Define B2C and B2B roles.
-[COMPLETE] Define phone OTP login.
-[COMPLETE] Define Personal and Business first-login profiles.
-[COMPLETE] Define direct pre-authorised admin login.
-[COMPLETE] Define wholesale application and approval.
-[COMPLETE] Define compliance-mode settings.
-[COMPLETE] Define version-one theme, content structure, primary UX and feature boundaries.
-[COMPLETE] Define content migration rules from the current site.
-[PLANNED] Complete detailed audit of existing live pages/assets.
-[PLANNED] Confirm licences, serviceable regions and transport process.
-[PLANNED] Confirm exact business/legal wording.
-[PLANNED] Confirm final product fields and entity relationship design.
-[PLANNED] Confirm logo/assets and available real factory/product photography.
-[PLANNED] Freeze version-one acceptance criteria.
-
-Exit criteria:
-- Version-one requirements frozen.
-- Legal operating mode and wording approved.
-- Database/application architecture documented.
-- No unresolved critical business-flow ambiguity.
+[COMPLETE] B2C/B2B roles and journeys.
+[COMPLETE] Personal/Business onboarding.
+[COMPLETE] Direct admin login.
+[COMPLETE] Test OTP direction.
+[COMPLETE] Compliance-mode architecture.
+[COMPLETE] Theme/content/UI/UX plan.
+[PLANNED] Confirm licences, regions, transport and exact legal wording.
+[PLANNED] Confirm real assets and final product fields.
 
 PHASE 2 — DESIGN SYSTEM AND UX (12%–20%)
-Status: PLANNED
+Status: FIRST IMPLEMENTATION PASS COMPLETE
 
-- Implement design tokens, typography and responsive grid.
-- Create logo variants and favicon assets.
-- Design/implement mobile and desktop navigation.
-- Build homepage visual shell.
-- Build retail catalogue/product card patterns.
-- Build product details and sticky mobile actions.
-- Build /login, OTP and account-type selection.
-- Build Personal onboarding.
-- Build Business onboarding and application status.
-- Build /admin/login and direct admin dashboard routing.
-- Build retail/wholesale cart and account patterns.
-- Build admin product, pricing, application and order screens.
-- Build loading, error, denied, pending, suspended and unavailable states.
-- Accessibility and reduced-motion review.
-
-Exit criteria:
-- Main public, personal, wholesale and admin screens approved.
-- Mobile flow approved before full implementation.
+[COMPLETE] Responsive design tokens and public UI shell.
+[COMPLETE] Catalogue, product, cart and auth screen patterns.
+[COMPLETE] Admin shell and product editor pattern.
+[PLANNED] Visual browser review and accessibility corrections.
+[PLANNED] Replace placeholder logo and product imagery.
 
 PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–31%)
-Status: PLANNED
+Status: SQL DRAFT COMPLETE; EXECUTION PENDING
 
-- Version-controlled schema and migrations.
-- profiles.account_type = personal/business only.
-- Protected user_roles for retail, applicant, wholesaler, staff and owner_admin.
-- Owner/admin bootstrap process.
-- RLS for every role and storage bucket.
-- Constraints, indexes, audit logs and rollback records.
-- Test-number/test-OTP development configuration documented without secrets.
-
-Exit criteria:
-- Schema migrated and version controlled.
-- RLS policies tested for every role.
-- Anonymous users cannot modify protected data.
+[COMPLETE] Create version-controlled schema.
+[COMPLETE] Draft role model, RLS and storage policies.
+[COMPLETE] Draft onboarding RPC functions.
+[PLANNED] Run schema in dedicated Supabase project.
+[PLANNED] Correct SQL execution issues.
+[PLANNED] Test every RLS role and storage policy.
+[PLANNED] Generate TypeScript database types.
 
 PHASE 4 — PHONE OTP, PROFILE AND ACCOUNT SHELL (31%–40%)
-Status: PLANNED
+Status: FRONTEND FOUNDATION COMPLETE; INTEGRATION PENDING
 
-- Configure Supabase Test OTP and safe test numbers.
-- Build /login and /admin/login.
-- Build secure role/profile router.
-- Build Personal and Business onboarding.
-- Protect customer, wholesale and admin routes.
-- Session, logout, resend, expiry, abuse and recovery handling.
-- Admin second-factor/recovery design.
-- Complete production SMS/DLT setup before launch.
-
-Exit criteria:
-- Test OTP works in development and staging.
-- Every protected route enforces correct role.
-- Normal verified customer cannot access admin.
+[COMPLETE] Build /login and /admin/login UI.
+[COMPLETE] Build OTP request/verify client flow.
+[COMPLETE] Build account-type selection.
+[COMPLETE] Build Personal and Business onboarding forms.
+[PLANNED] Configure test numbers and OTPs in Supabase.
+[PLANNED] Verify login/session/profile routing.
+[PLANNED] Add server-side route protection and session refresh.
 
 PHASE 5 — ADMIN PRODUCT, PRICE, CATEGORY AND CONTENT MANAGEMENT (40%–54%)
-Status: PLANNED
+Status: FIRST CREATE-PRODUCT FLOW CODED; NOT TESTED
 
-- Category and brand management.
-- Product create, edit, draft, publish, hide and archive.
-- Product photos and primary image.
-- Retail MRP/price and wholesale price lists.
-- MOQ, carton quantity and channel availability.
-- Stock, low-stock threshold and bulk availability update.
-- Homepage hero, offers, featured content, brands, regions, safety and contact settings.
-- Offer date ranges and automatic expiry.
-
-Exit criteria:
-- Owner independently manages product and changing website content without code changes.
+[COMPLETE] Build admin shell and dashboard.
+[COMPLETE] Build add-product interface.
+[COMPLETE] Build category creation action.
+[COMPLETE] Wire product, price, channel, inventory and image inserts.
+[PLANNED] Test against Supabase.
+[PLANNED] Add edit/delete/bulk actions and transactional safety.
+[PLANNED] Build content/offers/settings editor.
 
 PHASE 6 — IMAGE AND BUSINESS DOCUMENT MANAGEMENT (54%–61%)
-Status: PLANNED
+Status: STORAGE FOUNDATION CODED
 
-- Secure image/document upload.
-- Validation, compression, WebP and thumbnails.
-- Multiple images, ordering and safe deletion.
-- Private business-document policies.
-- Prevent orphaned files.
-- Real product/factory image migration.
-
-Exit criteria:
-- Product images are fast and manageable.
-- Business documents remain private.
+[COMPLETE] Define product and document buckets/policies.
+[COMPLETE] Wire primary product-image upload.
+[PLANNED] Add image compression, thumbnails and multiple-image management.
+[PLANNED] Wire private business-document uploads.
 
 PHASE 7 — PUBLIC LANDING PAGE (61%–69%)
-Status: PLANNED
+Status: STATIC/DUMMY-DATA FOUNDATION COMPLETE
 
-- Announcement/compliance bar.
-- Premium hero with Retail and Wholesale paths.
-- Personal/Business buying cards.
-- Categories, featured products and combo packs.
-- Admin-controlled current offer.
-- Retail/wholesale how-it-works.
-- Factory story, brands, service regions, trust, safety and contact.
-- Authentic reviews.
-- Responsive mobile navigation and professional footer.
-
-Exit criteria:
-- Homepage accurately represents both channels.
-- Core content loads quickly on mobile.
-- Every CTA reaches a working flow.
+[COMPLETE] Build responsive landing-page structure.
+[PLANNED] Connect admin-managed content and live products.
+[PLANNED] Replace placeholders with verified factory assets/content.
 
 PHASE 8 — RETAIL AND WHOLESALE CATALOGUES (69%–78%)
-Status: PLANNED
+Status: RETAIL DEMO FOUNDATION COMPLETE
 
-- Public retail catalogue and product pages.
-- Approved wholesale catalogue and assigned pricing.
-- Search, categories, brands, filters and sorting.
-- MOQ, carton and channel availability.
-- Sticky mobile product action.
-- Prevent hidden or unauthorised data exposure.
+[COMPLETE] Retail demo catalogue, search, filters and product details.
+[PLANNED] Replace demo data with Supabase queries.
+[PLANNED] Build authorised wholesale catalogue and assigned pricing.
 
-Exit criteria:
-- Retail and wholesale users see only correct catalogue/pricing.
+PHASE 9 — CARTS, QUOTES AND REQUEST FLOW (78%–87%)
+Status: RETAIL LOCAL CART FOUNDATION COMPLETE
 
-PHASE 9 — CARTS, QUOTES AND REQUEST/ORDER FLOW (78%–87%)
-Status: PLANNED
+[COMPLETE] Browser-persisted retail cart.
+[COMPLETE] Quantity, removal and subtotal UI.
+[PLANNED] Save authenticated carts to Supabase.
+[PLANNED] Build address and final request submission.
+[PLANNED] Add server-side price and eligibility validation.
+[PLANNED] Build wholesale cart and immutable order snapshots.
 
-- Separate retail and wholesale carts.
-- Server-side price, role, pack, MOQ and carton validation.
-- Addresses, immutable snapshots and request submission.
-- WhatsApp summary, confirmation and My Requests tracking.
-- Spam prevention and compliance-mode enforcement.
-- Use “Submit Requirement/Request Confirmation” wording in default mode.
+PHASE 10 — ADMIN BUSINESS AND REQUEST MANAGEMENT (87%–92%)
+Status: SHELL ONLY
 
-Exit criteria:
-- Complete B2C and B2B request journeys work on mobile/desktop.
-- Retail and wholesale data cannot mix.
-- Production cannot silently complete an unapproved online sale.
-
-PHASE 10 — ADMIN BUSINESS AND ORDER MANAGEMENT (87%–92%)
-Status: PLANNED
-
-- Review business profiles, documents and licence data.
-- Approve, reject, request correction, suspend and expire.
-- Assign wholesale price list.
-- Separate B2C/B2B request views.
-- Stock/compliance review, quote revision, status history and exports.
-- Dashboard metrics and recent activity.
-
-Exit criteria:
-- Owner processes businesses and requests without direct database access.
+[COMPLETE] Add application and request routes/placeholders.
+[PLANNED] Implement full workflows and status changes.
 
 PHASE 11 — SETTINGS, SEO, NOTIFICATIONS AND ANALYTICS (92%–95%)
 Status: PLANNED
 
-- Contact, region, compliance and minimum-order settings.
-- SMS/WhatsApp notifications.
-- SEO, sitemap, robots, canonical URLs and social metadata.
-- Current price-list date and downloadable file management.
-- Analytics and Search Console.
-
-Exit criteria:
-- Website is configurable, indexable, shareable and measurable.
-
 PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
 Status: PLANNED
-
-- Functional tests for every route and role.
-- OTP, role escalation, RLS and price-isolation tests.
-- Image/private-document, cart and immutable snapshot tests.
-- Offer expiry and content-setting tests.
-- Mobile, desktop, slow-network, accessibility and security review.
-- Backup, rollback and secret-history verification.
-
-Exit criteria:
-- No known critical defect.
-- Production release/security checklist passes.
 
 PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
 Status: PLANNED
 
-- Staging deployment and acceptance tests for every role.
-- Preserve current live website.
-- Complete legal, licence, service-region and production SMS/DLT checks.
-- Remove/disable development test OTP in production.
-- Production domain, HTTPS and deployment.
-- Verify landing, catalogue, login, profiles, admin and B2C/B2B flows.
-- Verify RLS, storage, analytics, sitemap and rollback procedure.
-
 100% COMPLETION DEFINITION
 --------------------------
-- Public website live on intended domain.
-- New customer can choose Personal or Business after OTP.
-- Returning users route correctly without repeating onboarding.
-- Pre-authorised admin logs in directly and securely.
-- Owner manages catalogue, pricing, availability, businesses, requests and content without code changes.
-- Retail and approved wholesale experiences remain isolated.
-- Production OTP provider works and test OTP is not exposed.
-- Security, performance, documentation, backups and production verification complete.
-
-PROGRESS SUMMARY
-----------------
-Overall: 3%
-
-Completed:
-- Correct private repository verified.
-- Permanent tracker created.
-- B2C/B2B, OTP, wholesale approval and compliance architecture recorded.
-- Personal/Business first-login profile routing recorded.
-- Direct pre-authorised admin login recorded.
-- Supabase Test OTP selected for development.
-- Complete theme, content, UI/UX, page, route and version-one feature plan recorded.
-- Detailed records maintained in:
-  - docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt
-  - docs/WEBSITE_THEME_CONTENT_UI_UX_FEATURE_PLAN.txt
-
-In progress:
-- Project foundation.
-- Dedicated Supabase connection.
-- Stack confirmation.
-- Requirements/legal operating model.
-- Asset and content confirmation.
-
-Next milestone:
-- Connect only the Gowtham Fireworks Supabase project.
-- Confirm Next.js, TypeScript and package manager.
-- Add foundation files without secrets.
-- Create first schema and RLS migration.
-- Configure safe development test phone/OTP values.
+- Public website is live on the intended domain.
+- Owner securely manages catalogue, content, retail/wholesale pricing and availability.
+- Customers authenticate with production-ready OTP.
+- Personal and approved-business experiences remain isolated.
+- Requests are stored with immutable product and price snapshots.
+- RLS, storage, mobile performance, legal wording, backups and production deployment are verified.
 
 BUILD AND CHANGE HISTORY
 ------------------------
@@ -529,62 +468,63 @@ Status: COMPLETE
 Changes:
 - Located private repository mkraja826/Gowthamfireworks.
 - Verified main branch and empty starting state.
-- Added this permanent tracker.
-Verification:
-- Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
+- Added permanent tracker.
+Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
 
 Entry 002
 Date: 24 July 2026
 Progress: 1% -> 2%
-Status: COMPLETE — architecture only; application not implemented
+Status: COMPLETE — architecture only
 Changes:
-- Approved B2C and B2B platform.
-- Approved phone OTP.
-- Defined wholesale approval, price isolation, separate carts and compliance modes.
+- Approved B2C/B2B platform, phone OTP, wholesale approval and compliance modes.
 - Added docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt.
-Verification:
-- Architecture commit: fbc8fcafd6c53a23e2a18c4981e120021c9bcdb4
-- Tracker update commit: f6056708b043de52bffbc1c76700532530fcb7a9
+Architecture commit: fbc8fcafd6c53a23e2a18c4981e120021c9bcdb4
+Tracker commit: f6056708b043de52bffbc1c76700532530fcb7a9
 
 Entry 003
 Date: 24 July 2026
-Progress: remains 2%
-Status: COMPLETE — architecture decision only; application not implemented
+Progress: remained 2%
+Status: COMPLETE — architecture decision only
 Changes:
-- First-time customer chooses Personal or Business after OTP.
-- Personal creates active retail profile.
-- Business creates pending wholesale application.
-- Admin removed from all public account-type choices.
-- Added separate /admin/login for pre-authorised admin users.
-- Defined direct role-based routing to /admin.
-- Defined server routing precedence and role-escalation protections.
-- Updated detailed architecture and permanent tracker.
-Verification:
-- Architecture update commit: e67f4d2bf9cb67785c6b20fe5d4fbc3fea2bde74
-- Tracker update commit: 8c752ccbe5bb3f06b3c3eeada2b041db2521ded3
-- No application code or database migration changed.
+- Defined Personal/Business first-login routing.
+- Defined direct /admin/login and admin role protections.
+Architecture update: e67f4d2bf9cb67785c6b20fe5d4fbc3fea2bde74
+Tracker update: 8c752ccbe5bb3f06b3c3eeada2b041db2521ded3
 
 Entry 004
 Date: 24 July 2026
 Progress: 2% -> 3%
-Status: COMPLETE — product/design plan only; application not implemented
+Status: COMPLETE — design/product plan only
 Changes:
-- Selected Supabase Test OTP for development and staging.
-- Approved “Sivakasi Midnight Festival” visual direction.
-- Defined colour, typography, image and motion principles.
-- Defined complete homepage content order.
-- Defined public catalogue and product detail UX.
-- Defined Personal, Business and direct Admin login/onboarding UX.
-- Defined separate retail/wholesale cart and request UX.
-- Defined admin dashboard, product editor and content-management UX.
-- Defined version-one essential features and deferred features.
-- Defined mobile, accessibility, performance and trust requirements.
-- Defined content migration/correction rules for the existing website.
-- Defined public, account, wholesale, cart and admin route map.
+- Defined theme, content, UI/UX and version-one features.
+- Selected Supabase Test OTP for development.
 - Added docs/WEBSITE_THEME_CONTENT_UI_UX_FEATURE_PLAN.txt.
-Verification:
-- Theme/UI/UX plan commit: 1f6f80155ae3493ad3c66d50da4660aec4a4eb0b
-- No application code, production website or database migration changed.
+Plan commit: 1f6f80155ae3493ad3c66d50da4660aec4a4eb0b
+Tracker update: c6e9de3151cd0609c7121463dfbdef00487bdf3d
+
+Entry 005
+Date: 24 July 2026
+Progress: 3% -> 16%
+Status: COMPLETE — first code foundation; production verification pending
+Changes:
+- Added Next.js/TypeScript/npm project foundation.
+- Added responsive public homepage, catalogue, product details and cart.
+- Added Supabase Test OTP customer/admin login clients.
+- Added Personal and Business onboarding.
+- Added wholesale information/application flow.
+- Added admin shell, dashboard and product-entry page.
+- Added category creation, channel pricing, inventory and image-upload integration code.
+- Added README, environment example and Supabase setup guide.
+- Added Supabase schema, RLS, storage buckets, seed data and owner bootstrap instructions.
+Commits:
+- Application scaffold: 5ad7e14ed25574eaf1cc80fc834c4dfbfb3d7182
+- Responsive design system: 37f3c056b013780aa9eb5c27801cb43856879b1a
+- Supabase schema foundation: 8794ca70a60a9efb9ebdf865beef748e0c767c69
+Validation:
+- Source parse check completed with global TypeScript compiler.
+- No project syntax errors observed.
+- Full dependency-based build not completed because npm registry requests timed out.
+- Supabase schema not executed.
 
 DECISION LOG
 ------------
@@ -595,66 +535,75 @@ Decision 004 — Serve B2C and B2B in one platform. APPROVED.
 Decision 005 — Use phone number plus OTP. APPROVED.
 Decision 006 — Hide wholesale pricing until owner approval. APPROVED.
 Decision 007 — Launch in enquiry/manual-confirmation mode unless exact transaction model is legally approved. APPROVED.
-Decision 008 — First-time customers choose Personal or Business; pre-authorised admins bypass customer onboarding and log directly into /admin; Admin is never a public choice. APPROVED.
-Decision 009 — Use Supabase Test OTP during development/staging and never expose it in production. APPROVED.
-Decision 010 — Use “Sivakasi Midnight Festival” as the public visual direction, with a calm light operational admin experience. APPROVED.
-Decision 011 — Make changing offers, service regions, hero content and business claims admin-controlled rather than hard-coded. APPROVED.
-Decision 012 — Keep product imagery clear and neutral in catalogue surfaces; decorative fireworks remain background/accent imagery. APPROVED.
+Decision 008 — New users choose Personal or Business; Admin is private and pre-authorised. APPROVED.
+Decision 009 — Use Next.js App Router, TypeScript, npm and custom CSS. APPROVED.
+Decision 010 — Use Supabase Test OTP during development. APPROVED.
+Decision 011 — Store version-one SQL in supabase/schema.sql and do not execute until frontend review. APPROVED.
+Decision 012 — Keep catalogue on demo data until schema and owner data are applied. APPROVED TEMPORARY IMPLEMENTATION.
 
 OPEN DECISIONS
 --------------
-- Confirm Next.js, TypeScript and package manager.
-- Confirm Cloudflare deployment mode.
-- Confirm final product image storage.
-- Select production SMS provider and complete applicable DLT setup.
-- Confirm logo files, colour approval and real factory/product photographs.
+- Confirm dedicated Supabase project URL and publishable key.
+- Confirm test phone numbers and OTP values.
+- Confirm owner admin phone number for bootstrap.
+- Confirm Cloudflare Workers/Pages deployment mode.
+- Confirm logo and real factory/product images.
 - Confirm licences, service regions, transport, age/identity requirements and B2B documents.
 - Confirm taxes, minimum values, cancellations/returns and current-site cutover approach.
-- Confirm exact homepage offer wording and verified trust claims.
+- Confirm production SMS provider and DLT setup.
 
 KNOWN RISKS
 -----------
+- Full Next.js build has not yet run with dependencies.
+- Supabase SQL has not yet been applied or tested.
+- Admin routes currently need server-side hardening beyond client role checks.
+- Product creation uses multiple inserts and should become transactional before production.
+- Public catalogue still uses demo products.
 - Fireworks ordering, possession, transport and online-sale wording require specialist legal review.
-- B2B status does not remove licence or transport obligations.
-- Test OTP must never remain exposed in production.
-- Production OTP endpoints require CAPTCHA, rate limits and DLT/provider configuration.
-- Incorrect RLS could expose phones, pricing or private documents.
-- Public onboarding must never allow role escalation.
-- Browser-supplied roles and prices cannot be trusted.
+- Incorrect RLS could expose phone numbers, pricing or documents.
 - Images require compression and storage controls.
-- Too much animation can harm mobile performance and accessibility.
-- Hard-coded promotions can become misleading after expiry.
-- Replacing the current site before staging verification could interrupt business.
+- Current live website must not be replaced before staging acceptance.
 
 SECRET-HANDLING RECORD
 ----------------------
 Never commit:
 - Supabase service-role key or database password.
 - SMS provider token/secret or OTP values.
-- Test phone/OTP values if they should remain private; store in local/staging secrets where appropriate.
 - GitHub/Cloudflare tokens.
 - Production .env.
 - Customer exports or private business/licence documents.
 
 Safe pattern:
-- Commit .env.example with names only.
+- Commit .env.example with variable names only.
 - Keep real values in local/hosting/Supabase secrets.
 - Keep service-role credentials server-side only.
 - Keep business documents in a private bucket.
-- Disable/remove development test OTP configuration before production launch.
 
-SESSION HANDOVER TEMPLATE
--------------------------
-Date:
-Current progress percentage:
-Current branch:
-Last completed task:
-Files changed:
-Database migrations applied:
-Tests run and results:
-Deployment status:
-Known issue or blocker:
-Exact next step:
+NEXT EXACT STEPS
+----------------
+1. Clone or pull main locally.
+2. Run npm install and commit package-lock.json.
+3. Run npm run typecheck, npm run lint and npm run build.
+4. Fix all build/type/lint issues and record them here.
+5. Review public UI locally.
+6. Only after review, run supabase/schema.sql in the dedicated project.
+7. Configure Supabase URL, publishable key and Test OTP numbers.
+8. Bootstrap owner_admin using the commented SQL.
+9. Test customer, business and admin flows.
+10. Replace demo catalogue with live Supabase data.
+
+SESSION HANDOVER
+----------------
+Date: 24 July 2026
+Current progress percentage: 16%
+Current branch: main
+Last completed task: First application and schema foundation committed.
+Files changed: Next.js app, components, lib, CSS, README, env example, Supabase SQL.
+Database migrations applied: None.
+Tests run: Source parse check only; full build unavailable because npm registry timed out.
+Deployment status: Not deployed.
+Known blocker: Dependencies and Supabase project are not yet connected/tested.
+Exact next step: Run npm install/typecheck/lint/build from a local clone, then connect the dedicated Supabase project.
 
 END OF PERMANENT PROJECT RECORD
-==============================
+===============================
