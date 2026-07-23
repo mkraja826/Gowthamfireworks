@@ -1,0 +1,826 @@
+GOWTHAM FIREWORKS — WEBSITE THEME, CONTENT, UI/UX AND FEATURE PLAN
+==================================================================
+
+Date approved for planning: 24 July 2026
+Repository: mkraja826/Gowthamfireworks
+Status: APPROVED PRODUCT DIRECTION; NOT YET IMPLEMENTED
+Authentication during development: Supabase Test OTP
+
+1. PRODUCT EXPERIENCE PRINCIPLE
+-------------------------------
+Build one premium, mobile-first platform with three clearly separated experiences:
+
+A. PUBLIC AND PERSONAL/B2C
+- Celebration-focused landing page.
+- Public retail catalogue.
+- Personal customer phone OTP login.
+- Retail cart/order-request flow.
+- Account, saved addresses and request tracking.
+
+B. BUSINESS/B2B
+- Business profile and wholesale application.
+- Owner approval before wholesale pricing is exposed.
+- Wholesale catalogue with assigned price list, MOQ and carton quantities.
+- Business quote/order-request history and application status.
+
+C. OWNER/ADMIN
+- Direct pre-authorised phone OTP login.
+- Calm operational interface rather than festive public styling.
+- Full control over products, images, prices, stock, customers, wholesale approvals, requests/orders and website content.
+
+The public website should feel celebratory and premium. The admin area should prioritise speed, clarity and low-error operation.
+
+2. THEME CONCEPT — “SIVAKASI MIDNIGHT FESTIVAL”
+------------------------------------------------
+
+Core idea:
+- A dark midnight canvas makes fireworks and product packaging look vivid.
+- Warm gold conveys factory heritage, quality and trust.
+- Crimson and ember orange create energy and celebration.
+- Product cards remain light or neutral so colourful boxes are easy to inspect.
+
+The site must not look like:
+- a casino;
+- a gaming website;
+- a crowded wholesale price poster;
+- a generic black-and-gold luxury template;
+- a children-only cartoon website;
+- a payment-first e-commerce site.
+
+Visual balance:
+- 65% clean neutral space and product clarity.
+- 25% midnight/navy atmosphere.
+- 10% celebratory colour and glow.
+
+3. PROPOSED DESIGN TOKENS
+-------------------------
+
+Primary colours:
+- Midnight Navy: #070B1A — main dark background.
+- Deep Indigo: #101735 — alternate dark surfaces.
+- Festival Gold: #F5B942 — primary accent and premium details.
+- Ember Orange: #FF6B2C — promotional accent and important highlights.
+- Celebration Crimson: #C92A3D — offer badges and selective emphasis.
+- Warm Ivory: #FFF8EC — warm light sections.
+- Product White: #FFFFFF — catalogue cards and forms.
+- Ink: #171923 — primary text on light backgrounds.
+- Muted Slate: #667085 — secondary text.
+- Success Green: #1F9D62 — available/approved/completed.
+- Warning Amber: #D98C10 — limited/pending.
+- Error Red: #C73737 — out of stock/rejected/destructive actions.
+
+Rules:
+- Gold is an accent, not body text.
+- Red is not used for every button.
+- Availability colours are consistent across public, account and admin screens.
+- Product photos never sit directly on a noisy fireworks background.
+- Every text/background pair must meet accessible contrast targets.
+
+4. TYPOGRAPHY
+-------------
+
+Recommended direction:
+- Display/headings: a strong, elegant serif or expressive Indian-display-compatible font used sparingly.
+- Interface/body: a highly readable sans-serif.
+- Numbers/prices/admin tables: tabular numerals where supported.
+
+Practical font pairing candidates:
+- Headings: DM Serif Display or Fraunces.
+- Interface: Inter, Manrope or Plus Jakarta Sans.
+- Tamil support can be added with Noto Sans Tamil when Tamil content is enabled.
+
+Rules:
+- No script fonts for long headings.
+- Mobile body text minimum approximately 16 px.
+- Price, quantity, MOQ and status must be easy to scan.
+
+5. LOGO AND BRAND TREATMENT
+---------------------------
+
+Required logo variants:
+- Full horizontal logo for desktop header.
+- Compact mark for mobile header and favicon.
+- White/light version for dark backgrounds.
+- Dark version for invoices, print and light surfaces.
+
+Brand motion:
+- A short, subtle firework bloom may appear once in the hero or logo reveal.
+- Avoid continuous flashing, rapid colour changes or loud autoplay effects.
+- Respect reduced-motion user preferences.
+
+6. IMAGE AND PHOTOGRAPHY DIRECTION
+----------------------------------
+
+Use real factory and product photography wherever possible:
+- Product box front at a consistent angle.
+- Optional side/back image for specifications.
+- One clean primary product image on a neutral background.
+- Factory exterior, packing process and team photographs for trust sections.
+- Authentic warehouse/shop images only where legally and operationally suitable.
+
+Product image rules:
+- Prefer a square 1:1 primary image.
+- Use a consistent crop and padding.
+- Avoid watermarks from other sellers.
+- Avoid low-resolution WhatsApp screenshots.
+- Compress and convert to modern formats.
+- Owner can set image focal point and primary image.
+
+Decorative imagery:
+- Wide night-sky fireworks footage or photography only in hero/background areas.
+- Dark overlay behind text.
+- Static fallback image for slow networks and reduced motion.
+
+7. GLOBAL NAVIGATION
+--------------------
+
+Desktop header:
+- Logo.
+- Home.
+- Retail Catalogue.
+- Gift/Combo Packs.
+- Wholesale.
+- About Factory.
+- Safety.
+- Contact.
+- Search.
+- Login/Profile.
+- Cart/Request basket.
+
+Mobile header:
+- Compact logo.
+- Search icon.
+- Cart icon with item count.
+- Menu button.
+
+Sticky mobile bottom navigation after login:
+- Home.
+- Catalogue.
+- Cart.
+- Orders.
+- Account.
+
+Wholesale navigation after approval:
+- Wholesale Home.
+- Catalogue.
+- Quick Order.
+- Quotes/Requests.
+- Account.
+
+Admin navigation:
+- Dashboard.
+- Products.
+- Categories.
+- Inventory.
+- Price Lists.
+- Retail Requests.
+- Wholesale Requests.
+- Wholesale Applications.
+- Customers.
+- Content/Offers.
+- Reports.
+- Settings.
+- Audit Log.
+
+8. HOMEPAGE CONTENT AND SECTION ORDER
+-------------------------------------
+
+8.1 Compliance/announcement bar
+- Admin-controlled wording.
+- Short and clear.
+- Links to detailed ordering process, safety or service conditions.
+- Do not use a full-screen popup on every visit unless legally required.
+
+8.2 Hero
+Recommended headline:
+“Factory-Direct Fireworks for Every Scale of Celebration”
+
+Recommended supporting copy:
+“Explore authentic Sivakasi fireworks for families, shops and wholesale partners. Build your requirement online and receive factory confirmation on availability, pricing and fulfilment.”
+
+Primary actions:
+- Shop Retail / Explore Retail Catalogue.
+- Apply for Wholesale.
+
+Secondary actions:
+- View Festival Packs.
+- Talk to the Factory.
+
+Trust strip below hero:
+- Factory-direct catalogue.
+- Retail and wholesale channels.
+- Transparent price display by account type.
+- Owner-confirmed availability.
+
+8.3 Choose how you are buying
+Two large cards:
+
+Personal / Family
+- Retail packs and celebration combos.
+- Fast product search.
+- Save cart and track requests.
+- CTA: Explore Retail.
+
+Business / Wholesale
+- MOQ and carton information.
+- Approved wholesale pricing.
+- Repeat-order tools.
+- CTA: Apply for Wholesale.
+
+8.4 Shop by category
+Suggested initial categories:
+- Sparklers.
+- Flower Pots.
+- Ground Chakkars.
+- Rockets.
+- Twinkling Stars.
+- Aerial Shots.
+- Sound Crackers.
+- Fancy Fountains.
+- Gift Boxes.
+- Family Combos.
+- Green/Low-Sound products only where accurately classified.
+
+Admin controls category name, image, visibility, order and channel availability.
+
+8.5 Featured products
+- 6 to 8 products maximum on homepage.
+- Tabs: Popular, Family Favourites, New, Limited Availability.
+- Each card shows image, name, pack size, price, availability and add action.
+
+8.6 Celebration packs
+Cards organised by customer need rather than only price:
+- Small Family Celebration.
+- Classic Diwali Night.
+- Premium Family Pack.
+- Grand Celebration Pack.
+- Business Starter Assortment where approved for B2B.
+
+8.7 Current offer banner
+- Fully admin controlled.
+- Start/end date.
+- Target: retail, wholesale or both.
+- Hide automatically when expired.
+- Never show a zero countdown.
+
+8.8 How it works
+Retail:
+Browse → Add products → Verify phone → Submit request → Factory confirms.
+
+Wholesale:
+Verify phone → Create business profile → Owner approval → View wholesale pricing → Submit requirement.
+
+8.9 Why Gowtham Fireworks
+Only publish verified claims:
+- Factory-direct relationship.
+- Authentic brands/products.
+- Transparent price and pack information.
+- Retail and wholesale support.
+- Responsive phone/WhatsApp assistance.
+- Safety and compliance-first confirmation.
+
+8.10 Factory story
+- History.
+- Location and Sivakasi connection.
+- Quality-selection process.
+- Packing/handling process.
+- Owner/team message.
+- Real photographs.
+
+8.11 Brands
+- Logo grid controlled from admin.
+- Links to filtered catalogue where useful.
+- Hide brands with no active products.
+
+8.12 Service regions
+- Admin-controlled locations and conditions.
+- Do not promise delivery everywhere.
+- Show “Contact us to confirm serviceability” for uncertain areas.
+
+8.13 Safety section
+- Adult supervision.
+- Outdoor use.
+- Safe distance.
+- Water/sand readiness.
+- Do not relight failed products.
+- Follow local rules and permitted timings.
+- Product-specific instructions on product page.
+
+8.14 Reviews/testimonials
+- Use only authentic approved reviews.
+- Name or initials, city and purchase type.
+- No auto-scrolling carousel that moves before users can read.
+
+8.15 Final CTA
+“Planning a family celebration or stocking your shop?”
+- Explore Retail.
+- Apply for Wholesale.
+- WhatsApp/Call.
+
+8.16 Footer
+- Business identity and address.
+- Phone, WhatsApp and email.
+- Retail Catalogue.
+- Wholesale.
+- About.
+- Safety.
+- Ordering process.
+- Privacy.
+- Terms.
+- Cancellation/returns wording when approved.
+- Social profiles.
+- Downloadable price list only when current.
+- No exposed admin email or public “Admin” link.
+
+9. PRODUCT CATALOGUE UI/UX
+--------------------------
+
+Catalogue controls:
+- Search by product, category or brand.
+- Category chips.
+- Availability filter.
+- Price range for retail.
+- Brand filter.
+- Featured/new/green/low-sound filters only when data is accurate.
+- Sort by recommended, name, price and newest.
+
+Desktop:
+- Filter panel plus responsive product grid.
+
+Mobile:
+- Search remains visible.
+- Filters open in a bottom sheet.
+- Applied-filter count is visible.
+- Two-column product grid where screen size permits.
+
+Product card:
+- Consistent image area.
+- Category/brand label.
+- Product name, maximum two lines.
+- Pack/unit information.
+- Retail price or wholesale assigned price.
+- MRP/discount only when genuine.
+- Availability badge.
+- Quantity control or Add button.
+- Quick view optional.
+
+Wholesale card additions:
+- MOQ.
+- Carton quantity.
+- Price tier label if appropriate.
+- Business availability.
+- Add in valid pack/carton increments.
+
+10. PRODUCT DETAIL PAGE
+-----------------------
+
+Sections:
+- Image gallery.
+- Product name, brand and category.
+- Current channel price.
+- Pack size/unit.
+- Retail minimum or wholesale MOQ/carton rule.
+- Availability.
+- Quantity stepper with rule guidance.
+- Add to relevant cart.
+- Description.
+- Product attributes.
+- Safety/use instructions.
+- Related products.
+- Share through WhatsApp.
+
+UX rules:
+- Sticky mobile add bar.
+- Server revalidates price and eligibility before request submission.
+- Out-of-stock product remains understandable but cannot be added.
+- Wholesale data is never present in unauthorised page responses.
+
+11. LOGIN AND TEST OTP EXPERIENCE
+--------------------------------
+
+Development mode:
+- Use Supabase Test OTP numbers.
+- Show a clear non-production banner only on local/staging environments.
+- Never show the test OTP on production.
+
+Customer route: /login
+Step 1:
+- Phone field with India +91 default and country selector if international use is retained.
+- Continue button.
+- Privacy/terms note.
+
+Step 2:
+- Six-digit OTP input.
+- Auto-focus and paste support.
+- Resend timer.
+- Change phone number.
+- Clear error/expiry state.
+
+After verification:
+- Existing profile is routed automatically.
+- First-time customer sees two account-type cards only:
+  Personal — buying for self/family.
+  Business — shop, wholesaler or organisation.
+- No Admin option.
+
+Admin route: /admin/login
+- Minimal branded screen.
+- Phone and OTP.
+- Pre-authorised role check.
+- Direct /admin redirect for owner_admin.
+- Non-admin users receive a safe access-denied message.
+
+12. PERSONAL ONBOARDING AND ACCOUNT
+----------------------------------
+
+Onboarding should be one short screen:
+- Full name.
+- Verified phone, read-only.
+- Optional email.
+- City.
+- State.
+- Preferred language.
+- Required acknowledgements.
+
+Personal account pages:
+- Overview.
+- My Requests/Orders.
+- Saved Addresses.
+- Saved/Favourite Products later.
+- Profile.
+- Help and WhatsApp.
+- Logout.
+
+13. BUSINESS ONBOARDING AND WHOLESALE UX
+----------------------------------------
+
+Use a progress stepper so the application is not overwhelming:
+1. Business basics.
+2. Address and service area.
+3. GST/licence details where applicable.
+4. Document upload.
+5. Review and declaration.
+
+Support:
+- Save draft.
+- Resume later.
+- Clear document requirements.
+- Upload status and file validation.
+- Owner correction requests shown field-by-field.
+
+Business status pages:
+- Draft.
+- Submitted/pending review.
+- Correction required.
+- Approved.
+- Rejected.
+- Suspended.
+- Expired.
+
+Approved wholesale dashboard:
+- Assigned price list.
+- Quick order by SKU/name.
+- Recent products.
+- Repeat previous request.
+- Request status.
+- Licence expiry reminder.
+- Contact account manager/owner.
+
+14. CART AND REQUEST FLOW
+-------------------------
+
+Retail and wholesale carts remain separate.
+
+Cart page:
+- Product image/name.
+- Current price.
+- Quantity stepper.
+- Pack/MOQ validation.
+- Availability warning.
+- Remove/save action.
+- Estimated subtotal.
+- Minimum requirement progress where configured.
+
+Submission steps:
+1. Cart review.
+2. OTP login if not authenticated.
+3. Contact/address.
+4. Service/compliance acknowledgements.
+5. Final review.
+6. Submit request.
+7. Confirmation number and next steps.
+
+Default production wording:
+- “Submit Requirement” or “Request Confirmation”.
+- Not “Pay Now”.
+- Not “Order Confirmed” before owner review.
+
+15. ADMIN UI/UX THEME
+---------------------
+
+Admin visual style:
+- Light neutral workspace.
+- Dark compact sidebar.
+- Very limited decorative fireworks.
+- Clear tables, forms and status colours.
+- Mobile-capable, but optimised for desktop/tablet operation.
+
+Admin dashboard:
+- Retail requests today.
+- Wholesale requests today.
+- Pending wholesale applications.
+- Available, limited and out-of-stock products.
+- Low-stock products.
+- Draft/unpublished products.
+- Current offers.
+- Recent activity.
+
+Quick actions:
+- Add Product.
+- Change Availability.
+- Review Business Application.
+- Create Offer.
+- View New Requests.
+
+Product list:
+- Search.
+- Category/channel/status filters.
+- Thumbnail.
+- Retail price.
+- Wholesale pricing indicator.
+- Retail and wholesale availability.
+- Stock.
+- Published status.
+- Inline availability changes.
+- Bulk publish/hide/availability where safe.
+
+Product editor sections:
+1. Basic information.
+2. Images.
+3. Retail pricing and availability.
+4. Wholesale pricing, MOQ and carton rules.
+5. Inventory.
+6. SEO.
+7. Preview and publish.
+
+Form safeguards:
+- Autosave draft where practical.
+- Warn before leaving unsaved changes.
+- Validate selling price versus MRP.
+- Preview retail and wholesale cards.
+- Confirmation for destructive actions.
+- Audit every price/role/approval change.
+
+16. ADMIN-CONTROLLED WEBSITE CONTENT
+------------------------------------
+
+Owner can manage without code:
+- Announcement bar.
+- Hero headline, copy and images/video.
+- Homepage CTAs.
+- Offer banners and dates.
+- Featured categories/products/packs.
+- Brand logos.
+- Factory story and photographs.
+- Service regions.
+- Safety content.
+- Contact details.
+- Social links.
+- Downloadable current price list.
+- SEO title and description.
+- Ordering/compliance mode.
+
+Use structured form fields rather than a dangerous unrestricted page builder for version one.
+
+17. ESSENTIAL VERSION-ONE FEATURES
+----------------------------------
+
+Public:
+- Responsive homepage.
+- Retail catalogue/search/filter.
+- Product details.
+- Personal and wholesale entry paths.
+- Contact, WhatsApp, safety and factory content.
+
+Authentication:
+- Supabase Test OTP in development.
+- Personal/business first-login profile choice.
+- Direct pre-authorised admin login.
+- Protected role routing and logout.
+
+Personal/B2C:
+- Retail cart.
+- Address/contact data.
+- Request submission.
+- My Requests status.
+
+Business/B2B:
+- Business onboarding.
+- Private document upload.
+- Application status.
+- Owner approval.
+- Assigned wholesale pricing.
+- MOQ/carton validation.
+- Wholesale request submission and history.
+
+Admin:
+- Dashboard.
+- Category/brand management.
+- Product, photo, price and availability management.
+- Inventory status.
+- Price lists.
+- Wholesale applications.
+- Retail/wholesale request management.
+- Homepage/offer/contact settings.
+- Audit log.
+
+Platform:
+- Supabase PostgreSQL/Auth/Storage/RLS.
+- Image compression.
+- Responsive performance.
+- SEO, sitemap and metadata.
+- Error monitoring and analytics.
+- Staging before domain switch.
+
+18. FEATURES DEFERRED UNTIL AFTER VERSION ONE
+---------------------------------------------
+
+Do not overload the first release with:
+- Online payment gateway.
+- Automatic shipping-rate calculation.
+- Live courier integration.
+- Credit limits and wholesaler accounting.
+- Complex loyalty points.
+- Multi-vendor marketplace.
+- Native Android/iOS apps.
+- AI recommendations.
+- Public customer chat system.
+- Fully flexible drag-and-drop page builder.
+
+Possible version-two additions:
+- Repeat-order templates.
+- CSV/Excel wholesale quick upload.
+- Barcode/SKU scanning in admin.
+- Inventory batch management.
+- Sales representative/staff roles.
+- Multilingual English/Tamil/Telugu/Malayalam content.
+- Notification centre.
+- Downloadable quote documents.
+- Advanced reports.
+
+19. MOBILE UX RULES
+-------------------
+
+- Design mobile first, not desktop compressed later.
+- Main action reachable with one thumb.
+- Buttons at least approximately 44 px touch height.
+- Sticky cart/add action where useful.
+- Forms use correct keyboard types.
+- OTP supports paste and one-time-code autofill.
+- Avoid large blocking popups.
+- Bottom sheets for filters and selectors.
+- Preserve cart and partially completed business application.
+- Show skeleton loading rather than blank screens.
+- Compress images and lazy-load below the fold.
+- WhatsApp and call actions are easy to reach but not intrusive.
+
+20. ACCESSIBILITY, PERFORMANCE AND TRUST
+---------------------------------------
+
+Accessibility:
+- Keyboard navigation.
+- Visible focus states.
+- Semantic headings and labels.
+- Alt text for meaningful images.
+- Reduced-motion mode.
+- No essential information conveyed by colour alone.
+
+Performance:
+- Optimised images.
+- Minimal hero video and static fallback.
+- Server-rendered catalogue where appropriate.
+- CDN caching for public assets.
+- Avoid large animation libraries.
+- Mobile slow-network testing.
+
+Trust:
+- Real business information.
+- Current phone/WhatsApp details.
+- Current price-list date.
+- Clear request/confirmation wording.
+- Accurate availability.
+- Visible privacy and safety links.
+- No fake countdown, fake stock scarcity or fake testimonials.
+
+21. CONTENT MIGRATION FROM CURRENT WEBSITE
+------------------------------------------
+
+Preserve only after owner verification:
+- Up-to percentage offers.
+- Minimum request/order amount.
+- Gift-with-value promotions.
+- Delivery/service regions.
+- Brand list.
+- GST-inclusive claim.
+- 24/7 support claim.
+- Downloadable price list.
+- Existing articles and SEO content.
+
+Every changing claim must move into admin-controlled settings with start/end dates or last-updated information.
+
+Required content corrections:
+- Replace “Shop Now” with wording consistent with the configured operating mode.
+- Remove exposed Admin link/email from public footer.
+- Remove duplicate hero slides.
+- Hide expired offers/countdowns automatically.
+- Use full location names rather than unexplained abbreviations.
+- Ensure social links point to the correct profiles.
+- Do not publish advice that contradicts the configured legal/compliance model.
+
+22. PROPOSED ROUTE MAP
+----------------------
+
+Public:
+- /
+- /catalogue
+- /catalogue/[category]
+- /product/[slug]
+- /packs
+- /wholesale
+- /about
+- /safety
+- /how-it-works
+- /contact
+- /login
+
+Onboarding/account:
+- /onboarding/account-type
+- /onboarding/personal
+- /onboarding/business
+- /account
+- /account/requests
+- /account/addresses
+- /business/application-status
+- /wholesale
+- /wholesale/quick-order
+- /wholesale/requests
+
+Cart/request:
+- /cart/retail
+- /cart/wholesale
+- /request/review
+- /request/confirmation/[reference]
+
+Admin:
+- /admin/login
+- /admin
+- /admin/products
+- /admin/products/new
+- /admin/categories
+- /admin/brands
+- /admin/inventory
+- /admin/price-lists
+- /admin/wholesale-applications
+- /admin/retail-requests
+- /admin/wholesale-requests
+- /admin/customers
+- /admin/content
+- /admin/reports
+- /admin/settings
+- /admin/audit-log
+
+23. DESIGN ACCEPTANCE CRITERIA
+------------------------------
+
+- The homepage clearly explains Personal/B2C and Business/B2B within the first screen and next section.
+- A customer can find a product within a few taps.
+- Product photography remains the strongest visual element in catalogue views.
+- Personal and Business onboarding are clearly different.
+- No public user can select Admin.
+- Admin sees a direct, operational dashboard after authorised OTP login.
+- Wholesale pricing is not rendered or returned to unapproved users.
+- Retail and wholesale carts cannot mix.
+- Every changing offer and business claim can be managed in admin.
+- Mobile pages remain fast and usable on slower networks.
+- The default request flow never implies automatic final sale or dispatch before owner confirmation.
+
+24. IMPLEMENTATION SEQUENCE FOR THIS PLAN
+-----------------------------------------
+
+1. Confirm logo/assets and real photography available.
+2. Confirm final colours and typography.
+3. Scaffold Next.js/TypeScript design system.
+4. Build static public homepage shell with placeholder content.
+5. Build test OTP login and role-routing prototypes.
+6. Create Supabase schema and RLS for profiles/roles.
+7. Build admin shell and product editor.
+8. Build public catalogue against admin-managed product data.
+9. Build personal and business onboarding.
+10. Build channel-specific carts and request flows.
+11. Build content/offer settings.
+12. Test mobile, permissions, performance and accessibility.
+13. Replace placeholders with verified factory content and images.
+14. Deploy staging and obtain owner approval before production switch.
+
+END OF WEBSITE THEME, CONTENT, UI/UX AND FEATURE PLAN
+=====================================================
