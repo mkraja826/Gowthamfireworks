@@ -40,9 +40,9 @@ The deploy command uploads those outputs using the committed `wrangler.jsonc`.
 
 ## Failures fixed on 24 July 2026
 
-### Failure 1 — missing first Worker service binding
+### Failure 1 — generated self-service binding
 
-The first deployment allowed Wrangler to auto-migrate the Next.js project. It generated a `WORKER_SELF_REFERENCE` service binding to `gowtham-fireworks` before that Worker existed.
+The first deployment allowed Wrangler to auto-migrate the Next.js project. It generated a `WORKER_SELF_REFERENCE` service binding before that Worker existed.
 
 Cloudflare rejected the deployment with code `10143`.
 
@@ -60,21 +60,7 @@ The package script was temporarily configured as:
 build = opennextjs-cloudflare build
 ```
 
-OpenNext calls the package `build` script while building Next.js. That caused:
-
-```text
-opennextjs-cloudflare build
-  -> package build
-     -> opennextjs-cloudflare build
-        -> package build
-           -> repeated indefinitely
-```
-
-Symptoms:
-
-- repeated “OpenNext — Cloudflare build” headings;
-- repeated `$ opennextjs-cloudflare build` lines;
-- deployment remained building for 20 minutes or longer.
+OpenNext calls the package `build` script while building Next.js. That caused OpenNext to call itself repeatedly.
 
 Fix:
 
@@ -83,14 +69,26 @@ build = next build
 cf:build = opennextjs-cloudflare build
 ```
 
+### Failure 3 — Worker name mismatch and future compatibility date
+
+The complete Next.js and OpenNext build passed, but the deploy failed with Cloudflare code `10021` because:
+
+- `wrangler.jsonc` used `gowtham-fireworks`, while the connected Cloudflare project expected `gowthamfireworks`;
+- compatibility date `2026-07-24` was still in the future from Cloudflare UTC during the deployment.
+
+Fix:
+
+- Worker name changed to `gowthamfireworks`;
+- compatibility date changed to `2026-07-23`.
+
 ## Committed Wrangler configuration
 
 ```jsonc
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "gowtham-fireworks",
+  "name": "gowthamfireworks",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2026-07-24",
+  "compatibility_date": "2026-07-23",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
   "assets": {
@@ -99,6 +97,13 @@ cf:build = opennextjs-cloudflare build
   }
 }
 ```
+
+This configuration:
+
+- matches the Cloudflare connected-build Worker name;
+- uses a compatibility date that is not ahead of Cloudflare UTC;
+- contains no `WORKER_SELF_REFERENCE` binding;
+- contains no first-deploy R2 cache binding.
 
 ## Environment variables
 
