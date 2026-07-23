@@ -7,77 +7,63 @@ Default branch: main
 Repository visibility: Private
 Record created: 24 July 2026
 Last updated: 24 July 2026
-Current overall progress: 16%
-Current phase: Foundation, design system and first application implementation
+Current overall progress: 18%
+Current phase: First application foundation, verified production build, deployment configuration repair
 
 PURPOSE
 -------
-This file is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
+This is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
 
-Update it after every meaningful architecture decision, database migration, code change, test, deployment, failure, fix or milestone so the project can always be resumed without losing how it was built.
-
-MAINTENANCE RULES
------------------
-1. Never mark implementation COMPLETE until it is built and verified.
-2. Record exact files, migrations, routes, services and commits whenever possible.
-3. Preserve failures and fixes instead of deleting history.
-4. Never store passwords, service-role keys, API secrets, access tokens, OTP values or customer data here.
-5. Keep the existing live website stable while the replacement is developed and tested separately.
-6. Use PLANNED, IN PROGRESS, BLOCKED and COMPLETE consistently.
-7. Update percentage only when a defined milestone is genuinely completed.
-8. Keep this file for the complete life of the project.
+Update this file after every meaningful architecture decision, database migration, code change, test, deployment, failure, fix or milestone. Never store secrets, OTP values, customer exports or private licence documents here.
 
 PROJECT GOAL
 ------------
-Build a premium mobile-first Gowtham Fireworks Industries platform serving:
+Build one premium mobile-first platform serving:
 - B2C: factory to personal/retail customer.
 - B2B: factory to approved business/wholesaler.
-
-The owner must control products, photos, categories, retail and wholesale pricing, MOQ, carton quantities, availability, stock, customer requests, business applications, offers and website settings without editing code.
+- Owner/admin: catalogue, price, stock, application, request and website-content control without code editing.
 
 CONFIRMED PRODUCT DIRECTION
 ---------------------------
 Status: APPROVED
 
 1. Premium public landing page and searchable catalogue.
-2. One application with separate Personal/B2C and Business/B2B paths.
+2. Separate Personal/B2C and Business/B2B experiences in one application.
 3. Phone-number and OTP authentication.
 4. Supabase Test OTP during development and staging.
-5. First-time customer chooses Personal or Business after OTP verification.
-6. Personal creates an active retail profile.
-7. Business creates a business profile and pending wholesale application.
-8. Wholesale prices remain hidden until owner approval.
-9. Admin is never shown as a public account-type option.
-10. Pre-authorised owner/admin users use /admin/login and route directly to /admin after role verification.
-11. Normal customers cannot promote themselves to admin.
-12. Owner controls every product photo, retail price, wholesale price, stock and availability from admin.
-13. Dedicated Supabase project/account; never mix data with CapDent, Astro or another project.
-14. Production ordering uses compliance-first configuration.
-15. Default launch behaviour is enquiry/order-request plus manual owner confirmation.
-16. No payment gateway is included in version one.
-17. Visual direction is “Sivakasi Midnight Festival”.
-18. Public UI is celebratory; admin UI is calm, light and operational.
+5. New customers choose Personal or Business only after OTP verification.
+6. Personal accounts become retail_customer accounts.
+7. Business accounts become wholesale_applicant accounts until owner approval.
+8. Wholesale prices, MOQ and carton information remain hidden until approval.
+9. Admin is never offered as a public signup option.
+10. Pre-authorised admins use /admin/login and route directly to /admin after role verification.
+11. Owner controls product photos, retail/wholesale prices, stock and availability.
+12. Use a dedicated Gowtham Fireworks Supabase project only.
+13. Default transaction mode is ENQUIRY_ONLY / MANUAL_CONFIRMATION.
+14. No payment gateway in version one.
+15. Visual direction: “Sivakasi Midnight Festival”.
+16. Public UI is celebratory; admin UI is light, calm and operational.
 
 TECHNICAL STACK
 ---------------
 Status: SELECTED AND SCAFFOLDED
 
-- Framework: Next.js App Router with TypeScript.
-- React: React 19 dependency range.
-- Package manager: npm.
-- Styling: custom responsive CSS design system.
-- Database: Supabase PostgreSQL.
-- Authentication: Supabase Auth phone OTP.
-- Development authentication: Supabase Test OTP.
-- Authorization: Supabase Row Level Security plus trusted server checks.
-- Supabase browser integration: @supabase/ssr.
-- Product images: public Supabase Storage bucket.
-- Business documents: private Supabase Storage bucket.
-- Hosting/CDN: Cloudflare planned; deployment mode not yet configured.
+- Next.js App Router with TypeScript.
+- React 19.
+- npm scripts; Cloudflare CI may install with Bun when no npm lockfile is present.
+- Custom responsive CSS design system.
+- Supabase PostgreSQL.
+- Supabase Auth phone OTP.
+- Supabase Test OTP for development.
+- Supabase Row Level Security plus trusted server checks.
+- @supabase/ssr browser integration.
+- Supabase Storage for product images and private business documents.
+- Cloudflare Workers using @opennextjs/cloudflare.
+- Wrangler for deployment.
 
 IMPLEMENTED ROUTES
 ------------------
-Public and customer:
+Public/customer:
 - /
 - /catalogue
 - /catalogue/[slug]
@@ -95,133 +81,51 @@ Admin:
 - /admin/applications
 - /admin/requests
 
-IMPLEMENTED PUBLIC EXPERIENCE
------------------------------
-Status: FIRST WORKING UI FOUNDATION COMPLETE; LIVE DATA NOT CONNECTED
+IMPLEMENTED APPLICATION FEATURES
+--------------------------------
+Public and retail:
+- Responsive homepage.
+- Retail and Wholesale entry cards.
+- Categories and featured products.
+- Retail catalogue search and filters.
+- Product detail pages with static generation.
+- Availability badges.
+- Browser-persisted retail cart.
+- Quantity controls and subtotal.
+- Factory-confirmation wording instead of payment wording.
+- Safety, factory-story, contact and footer sections.
 
-- Sticky responsive header.
-- Announcement/compliance bar.
-- Premium hero with Retail and Wholesale paths.
-- Personal versus Business buying cards.
-- Category cards.
-- Featured product cards.
-- How-it-works steps.
-- Factory story placeholder content.
-- Safety section.
-- Final calls to action.
-- Professional footer.
-- Mobile navigation.
-- Reduced-motion support.
-- Retail catalogue search and category filters.
-- Product detail pages.
-- Availability states.
-- Browser-local retail cart with quantity changes and subtotal.
-- Requirement/manual-confirmation wording.
-
-Current catalogue data:
-- Uses lib/demo-data.ts placeholders until Supabase is applied and public catalogue queries replace demo data.
-- Real product photographs and verified business claims have not been inserted.
-
-AUTHENTICATION AND PROFILE ROUTING
-----------------------------------
-Status: CLIENT FOUNDATION IMPLEMENTED; DATABASE NOT APPLIED
-
-Customer login:
-- /login requests and verifies Supabase phone OTP.
-- First-time authenticated users route to /onboarding/account-type.
-- Personal routes to /onboarding/personal.
-- Business routes to /business/apply.
-- Existing personal users route to retail catalogue.
-- Existing business users route to wholesale area.
-
-Admin login:
-- /admin/login requests and verifies phone OTP.
-- Reads protected user_roles after verification.
-- owner_admin or staff routes to /admin.
-- Non-admin verified users are signed out and denied.
-- Admin is never a public profile choice.
-
-Remaining authentication work:
-- Apply Supabase schema.
-- Configure safe test phone numbers and OTP values.
-- Add local environment values.
-- Add server-side session refresh and route guards.
-- Verify direct URL protection.
-- Add production admin recovery/second-factor strategy.
-
-IMPLEMENTED PERSONAL AND BUSINESS EXPERIENCE
---------------------------------------------
-Status: CLIENT FOUNDATION COMPLETE; REQUIRES SUPABASE
-
-Personal:
-- Account-type selection.
-- Short personal onboarding form.
-- complete_personal_onboarding RPC call.
-
-Business:
-- Wholesale information page.
+Authentication/onboarding:
+- Supabase phone OTP request and verify client flow.
+- Customer /login.
+- Separate /admin/login.
+- Personal/Business first-login choice.
+- Personal onboarding form.
 - Business application form.
-- Business name, contact, GST, address, licence and expected-volume fields.
-- complete_business_onboarding RPC call.
-- Owner approval required before wholesale role/pricing.
+- Admin-role verification client flow.
+- No public Admin signup option.
 
-IMPLEMENTED ADMIN EXPERIENCE
-----------------------------
-Status: FIRST OPERATIONAL UI FOUNDATION COMPLETE; REQUIRES SUPABASE AND ROUTE HARDENING
-
-- Separate owner login.
-- Dark compact sidebar and light workspace.
-- Dashboard metric cards and quick actions.
-- Product management page.
-- Add-category action.
-- Product name, slug, category, description and pack size.
-- Product photo upload.
+Admin foundation:
+- Admin dashboard shell.
+- Product-entry screen.
+- Product name, description and category.
+- Product image upload wiring.
 - Retail MRP and selling price.
-- Retail availability.
-- Wholesale price, MOQ and carton quantity.
-- Wholesale availability.
-- Stock quantity and low-stock threshold.
-- Draft/active/archived status.
-- Publish toggle.
-- Product list query.
-- Product image upload to product-images bucket.
-- Business application and request placeholder screens.
+- Wholesale price.
+- MOQ and carton quantity.
+- Separate retail/wholesale visibility and availability.
+- Stock and low-stock threshold.
+- Draft/active/archived and publish controls.
+- Category creation.
+- Product/application/request routes.
 
-Remaining admin work:
-- Server-side route guard.
-- Edit and archive existing products.
-- Atomic/transactional product creation.
-- Image compression and thumbnails.
-- Multiple images, ordering and safe deletion.
-- Business application approve/reject/correction actions.
-- Wholesale price-list assignment.
-- Request status management.
-- Offers/content/settings editor.
-- Audit-log UI.
-- Reports/export.
+SUPABASE SCHEMA FOUNDATION
+--------------------------
+Status: DRAFT COMMITTED; NOT EXECUTED
+File: supabase/schema.sql
+Commit: 8794ca70a60a9efb9ebdf865beef748e0c767c69
 
-COMMERCE AND COMPLIANCE MODE
-----------------------------
-Status: APPROVED ARCHITECTURE; LEGAL OPERATING REVIEW REQUIRED
-
-Modes:
-- ENQUIRY_ONLY: customer submits a requirement; no completed online sale.
-- MANUAL_CONFIRMATION: owner checks customer, stock, location, licence where applicable, transport and eligibility.
-- LICENSED_ORDERING: disabled until written legal/compliance approval for the exact model and regions.
-
-Default launch mode:
-- ENQUIRY_ONLY / MANUAL_CONFIRMATION
-
-No payment gateway or automatic dispatch promise is enabled merely because the software supports carts and request records.
-
-SUPABASE SCHEMA
----------------
-Status: CODED IN REPOSITORY; NOT EXECUTED OR VERIFIED AGAINST A PROJECT
-
-File:
-- supabase/schema.sql
-
-Schema includes:
+Tables and systems included:
 - profiles
 - user_roles
 - admin_allowlist
@@ -248,7 +152,7 @@ Schema includes:
 - offers
 - audit_logs
 
-Schema also includes:
+Also included:
 - auth.users profile trigger.
 - Admin allowlist bootstrap.
 - Personal onboarding RPC.
@@ -262,348 +166,289 @@ Schema also includes:
 - Compliance-first site setting.
 - Commented owner bootstrap SQL.
 
-Do not run this schema in CapDent, Astro or another project.
+Do not run this SQL in CapDent, Astro or another Supabase project.
+
+CLOUDFLARE DEPLOYMENT CONFIGURATION
+-----------------------------------
+Status: FIRST-DEPLOY FIX COMMITTED; REDEPLOY VERIFICATION PENDING
+
+Files:
+- wrangler.jsonc
+- open-next.config.ts
+- docs/CLOUDFLARE_DEPLOYMENT.md
+
+Current Cloudflare Git build commands:
+- Build command: npm run build
+- Deploy command: npx wrangler deploy
+
+package.json behaviour:
+- npm run build -> opennextjs-cloudflare build
+- npm run build:next -> next build
+- npm run cf:deploy -> wrangler deploy
+- npm run preview -> OpenNext build and preview
+- npm run deploy -> OpenNext build and Wrangler deploy
+
+The checked-in wrangler.jsonc uses:
+- Worker name: gowtham-fireworks
+- Main: .open-next/worker.js
+- Assets: .open-next/assets
+- nodejs_compat
+- Observability enabled
+- No WORKER_SELF_REFERENCE service binding
+- No R2 incremental-cache binding for the first deployment
 
 VALIDATION STATUS
 -----------------
-Status: PARTIAL
+Status: PRODUCTION BUILD PASSED; DEPLOYMENT FIX NOT YET RE-VERIFIED
 
-Completed:
-- TypeScript/TSX source was parsed with the available global TypeScript compiler.
-- No syntax/parse errors were found in project source files.
-- Missing-module errors were expected because project dependencies were not installed in the execution environment.
-- Repository commits were created and verified through GitHub.
+Cloudflare build run on 23 July 2026 completed:
+- Dependencies installed successfully with Bun.
+- Next.js compiled successfully.
+- TypeScript completed successfully.
+- 21 static/SSG pages generated successfully.
+- OpenNext Cloudflare build completed successfully.
+- .open-next/worker.js generated.
+- Static assets bundled and uploaded before deployment validation.
 
-Not completed:
-- npm install.
-- npm run typecheck with installed packages.
-- npm run lint.
-- npm run build.
-- Browser visual test.
-- Supabase SQL execution.
-- RLS test matrix.
-- OTP login test.
-- Image upload test.
-- Cloudflare deployment.
+Generated routes verified in build output:
+- /
+- /admin
+- /admin/applications
+- /admin/login
+- /admin/products
+- /admin/requests
+- /business/apply
+- /cart
+- /catalogue
+- /catalogue/[slug] with generated product paths
+- /login
+- /onboarding/account-type
+- /onboarding/personal
+- /wholesale
 
-Reason:
-- npm registry requests timed out in the available execution environment.
+DEPLOYMENT FAILURE 001
+----------------------
+Date: 23 July 2026
+Status: ROOT CAUSE FOUND AND CONFIG FIX COMMITTED
 
-CURRENT REPOSITORY FILES ADDED
-------------------------------
-Foundation:
-- package.json
-- tsconfig.json
-- next-env.d.ts
-- next.config.ts
-- eslint.config.mjs
-- .gitignore
-- .env.example
-- README.md
+Observed failure:
+- Cloudflare error code: 10143.
+- Generated service binding WORKER_SELF_REFERENCE referenced Worker gowtham-fireworks.
+- The Worker did not yet exist, so the first deployment was rejected.
 
-Application:
-- app/layout.tsx
-- app/globals.css
-- app/page.tsx
-- app/catalogue/page.tsx
-- app/catalogue/[slug]/page.tsx
-- app/cart/page.tsx
-- app/login/page.tsx
-- app/wholesale/page.tsx
-- app/onboarding/account-type/page.tsx
-- app/onboarding/personal/page.tsx
-- app/business/apply/page.tsx
-- app/admin/login/page.tsx
-- app/admin/(dashboard)/layout.tsx
-- app/admin/(dashboard)/page.tsx
-- app/admin/(dashboard)/products/page.tsx
-- app/admin/(dashboard)/applications/page.tsx
-- app/admin/(dashboard)/requests/page.tsx
+Cause:
+- Repository had no committed wrangler.jsonc or open-next.config.ts.
+- Running npx wrangler deploy in CI triggered automatic Next.js/OpenNext migration.
+- The migration generated R2 incremental-cache resources and a self-service binding.
+- Cloudflare requires a service-binding target Worker to exist before deploying a Worker that references it.
 
-Components and libraries:
-- components/cart-provider.tsx
-- components/site-header.tsx
-- components/site-footer.tsx
-- components/product-card.tsx
-- components/phone-otp-form.tsx
-- lib/types.ts
-- lib/demo-data.ts
-- lib/format.ts
-- lib/supabase/client.ts
+Fix committed:
+- Added explicit wrangler.jsonc without a self-service binding.
+- Added explicit open-next.config.ts.
+- Added @opennextjs/cloudflare and wrangler as project devDependencies.
+- Changed npm run build to generate .open-next output.
+- Preserved existing mandatory deployment command npx wrangler deploy.
+- Added .open-next and .dev.vars exclusions to .gitignore.
+- Added docs/CLOUDFLARE_DEPLOYMENT.md.
 
-Supabase:
-- supabase/schema.sql
-- supabase/README.md
+Fix commits:
+- package/OpenNext scripts: b76c9b98a1e4a0afd254052ae8e66eb6790e51d2
+- wrangler.jsonc: 718dde21bd356e9b50288f1494f67b8463c2ec77
+- open-next.config.ts: 2becdf32c97a226b7c52a48580f8a9b7945f91d0
+- .gitignore: 69034a0a69f684c2c7cd456fe34cc9a6208d0ee3
+- default OpenNext build command: edde9f71534533994fe91be8b9b6e4a1ba7af084
+- deployment guide: 4394b616a80a7786c2af07e234bcffc9e5d03536
+
+Pending verification:
+- Trigger a fresh Cloudflare deployment from the latest main commit.
+- Confirm Worker gowtham-fireworks is created successfully.
+- Confirm no WORKER_SELF_REFERENCE binding appears.
+- Verify the workers.dev URL and all major routes.
 
 ROADMAP — 0% TO 100%
 ---------------------
 
 PHASE 0 — PROJECT FOUNDATION (0%–5%)
 Status: COMPLETE FOR FIRST SCAFFOLD
-
-[COMPLETE] Locate repository and create permanent tracker.
-[COMPLETE] Select Next.js, TypeScript and npm.
-[COMPLETE] Add config, README, .gitignore and .env.example.
-[COMPLETE] Preserve secret-handling rules.
-[PLANNED] Install dependencies and commit package-lock.json.
-[PLANNED] Confirm Cloudflare staging/production workflow.
+- Repository, tracker, Next.js foundation, README, env example and secret rules complete.
+- Cloudflare/OpenNext deployment files committed.
+- package-lock.json still pending.
 
 PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
-Status: SUBSTANTIALLY DOCUMENTED; BUSINESS CONFIRMATIONS REMAIN
-
-[COMPLETE] B2C/B2B roles and journeys.
-[COMPLETE] Personal/Business onboarding.
-[COMPLETE] Direct admin login.
-[COMPLETE] Test OTP direction.
-[COMPLETE] Compliance-mode architecture.
-[COMPLETE] Theme/content/UI/UX plan.
-[PLANNED] Confirm licences, regions, transport and exact legal wording.
-[PLANNED] Confirm real assets and final product fields.
+Status: SUBSTANTIALLY DOCUMENTED
+- B2C/B2B, profiles, admin routing, test OTP, compliance modes and theme complete.
+- Business confirmations remain: licences, regions, transport and legal wording.
 
 PHASE 2 — DESIGN SYSTEM AND UX (12%–20%)
 Status: FIRST IMPLEMENTATION PASS COMPLETE
-
-[COMPLETE] Responsive design tokens and public UI shell.
-[COMPLETE] Catalogue, product, cart and auth screen patterns.
-[COMPLETE] Admin shell and product editor pattern.
-[PLANNED] Visual browser review and accessibility corrections.
-[PLANNED] Replace placeholder logo and product imagery.
+- Responsive public/admin shell complete.
+- Browser visual review, accessibility corrections and real assets pending.
 
 PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–31%)
 Status: SQL DRAFT COMPLETE; EXECUTION PENDING
-
-[COMPLETE] Create version-controlled schema.
-[COMPLETE] Draft role model, RLS and storage policies.
-[COMPLETE] Draft onboarding RPC functions.
-[PLANNED] Run schema in dedicated Supabase project.
-[PLANNED] Correct SQL execution issues.
-[PLANNED] Test every RLS role and storage policy.
-[PLANNED] Generate TypeScript database types.
+- Schema, RLS, storage and onboarding RPC draft complete.
+- Apply to dedicated project, fix SQL and run RLS tests next.
 
 PHASE 4 — PHONE OTP, PROFILE AND ACCOUNT SHELL (31%–40%)
 Status: FRONTEND FOUNDATION COMPLETE; INTEGRATION PENDING
-
-[COMPLETE] Build /login and /admin/login UI.
-[COMPLETE] Build OTP request/verify client flow.
-[COMPLETE] Build account-type selection.
-[COMPLETE] Build Personal and Business onboarding forms.
-[PLANNED] Configure test numbers and OTPs in Supabase.
-[PLANNED] Verify login/session/profile routing.
-[PLANNED] Add server-side route protection and session refresh.
+- Login/onboarding UI and client flow complete.
+- Supabase test-number configuration, session protection and routing tests pending.
 
 PHASE 5 — ADMIN PRODUCT, PRICE, CATEGORY AND CONTENT MANAGEMENT (40%–54%)
 Status: FIRST CREATE-PRODUCT FLOW CODED; NOT TESTED
-
-[COMPLETE] Build admin shell and dashboard.
-[COMPLETE] Build add-product interface.
-[COMPLETE] Build category creation action.
-[COMPLETE] Wire product, price, channel, inventory and image inserts.
-[PLANNED] Test against Supabase.
-[PLANNED] Add edit/delete/bulk actions and transactional safety.
-[PLANNED] Build content/offers/settings editor.
+- Product/category create foundation complete.
+- Edit, delete, bulk actions, transaction safety and content editor pending.
 
 PHASE 6 — IMAGE AND BUSINESS DOCUMENT MANAGEMENT (54%–61%)
 Status: STORAGE FOUNDATION CODED
-
-[COMPLETE] Define product and document buckets/policies.
-[COMPLETE] Wire primary product-image upload.
-[PLANNED] Add image compression, thumbnails and multiple-image management.
-[PLANNED] Wire private business-document uploads.
+- Buckets/policies and primary image upload wiring complete.
+- Compression, thumbnails, multiple images and private document upload pending.
 
 PHASE 7 — PUBLIC LANDING PAGE (61%–69%)
-Status: STATIC/DUMMY-DATA FOUNDATION COMPLETE
-
-[COMPLETE] Build responsive landing-page structure.
-[PLANNED] Connect admin-managed content and live products.
-[PLANNED] Replace placeholders with verified factory assets/content.
+Status: STATIC DEMO FOUNDATION COMPLETE
+- Responsive landing structure complete.
+- Live Supabase content and real factory assets pending.
 
 PHASE 8 — RETAIL AND WHOLESALE CATALOGUES (69%–78%)
 Status: RETAIL DEMO FOUNDATION COMPLETE
-
-[COMPLETE] Retail demo catalogue, search, filters and product details.
-[PLANNED] Replace demo data with Supabase queries.
-[PLANNED] Build authorised wholesale catalogue and assigned pricing.
+- Retail demo catalogue/search/product pages complete.
+- Live queries and authorised wholesale pricing pending.
 
 PHASE 9 — CARTS, QUOTES AND REQUEST FLOW (78%–87%)
 Status: RETAIL LOCAL CART FOUNDATION COMPLETE
-
-[COMPLETE] Browser-persisted retail cart.
-[COMPLETE] Quantity, removal and subtotal UI.
-[PLANNED] Save authenticated carts to Supabase.
-[PLANNED] Build address and final request submission.
-[PLANNED] Add server-side price and eligibility validation.
-[PLANNED] Build wholesale cart and immutable order snapshots.
+- Browser cart complete.
+- Authenticated persistence, address, request submission and server validation pending.
 
 PHASE 10 — ADMIN BUSINESS AND REQUEST MANAGEMENT (87%–92%)
 Status: SHELL ONLY
-
-[COMPLETE] Add application and request routes/placeholders.
-[PLANNED] Implement full workflows and status changes.
+- Routes exist.
+- Full workflows and status changes pending.
 
 PHASE 11 — SETTINGS, SEO, NOTIFICATIONS AND ANALYTICS (92%–95%)
 Status: PLANNED
 
 PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
-Status: PLANNED
+Status: STARTED
+- Cloudflare/Next/OpenNext production build passed.
+- Browser, Supabase, RLS, OTP, accessibility and security tests remain.
 
 PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
-Status: PLANNED
-
-100% COMPLETION DEFINITION
---------------------------
-- Public website is live on the intended domain.
-- Owner securely manages catalogue, content, retail/wholesale pricing and availability.
-- Customers authenticate with production-ready OTP.
-- Personal and approved-business experiences remain isolated.
-- Requests are stored with immutable product and price snapshots.
-- RLS, storage, mobile performance, legal wording, backups and production deployment are verified.
+Status: DEPLOYMENT CONFIGURED; FIRST SUCCESSFUL DEPLOY PENDING
+- First deploy failed due generated self-binding.
+- Configuration fix committed.
+- Fresh deploy and route verification pending.
 
 BUILD AND CHANGE HISTORY
 ------------------------
+Entry 001 — 0% -> 1%
+- Repository located and tracker created.
+- Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
 
-Entry 001
-Date: 24 July 2026
-Progress: 0% -> 1%
-Status: COMPLETE
-Changes:
-- Located private repository mkraja826/Gowthamfireworks.
-- Verified main branch and empty starting state.
-- Added permanent tracker.
-Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
+Entry 002 — 1% -> 2%
+- B2C/B2B, OTP, wholesale approval and compliance architecture.
+- Architecture: fbc8fcafd6c53a23e2a18c4981e120021c9bcdb4
+- Tracker: f6056708b043de52bffbc1c76700532530fcb7a9
 
-Entry 002
-Date: 24 July 2026
-Progress: 1% -> 2%
-Status: COMPLETE — architecture only
-Changes:
-- Approved B2C/B2B platform, phone OTP, wholesale approval and compliance modes.
-- Added docs/COMMERCE_AND_PHONE_OTP_ARCHITECTURE.txt.
-Architecture commit: fbc8fcafd6c53a23e2a18c4981e120021c9bcdb4
-Tracker commit: f6056708b043de52bffbc1c76700532530fcb7a9
+Entry 003 — remained 2%
+- Personal/Business onboarding and direct admin routing.
+- Architecture: e67f4d2bf9cb67785c6b20fe5d4fbc3fea2bde74
+- Tracker: 8c752ccbe5bb3f06b3c3eeada2b041db2521ded3
 
-Entry 003
-Date: 24 July 2026
-Progress: remained 2%
-Status: COMPLETE — architecture decision only
-Changes:
-- Defined Personal/Business first-login routing.
-- Defined direct /admin/login and admin role protections.
-Architecture update: e67f4d2bf9cb67785c6b20fe5d4fbc3fea2bde74
-Tracker update: 8c752ccbe5bb3f06b3c3eeada2b041db2521ded3
+Entry 004 — 2% -> 3%
+- Theme, content, UI/UX and feature plan.
+- Plan: 1f6f80155ae3493ad3c66d50da4660aec4a4eb0b
+- Tracker: c6e9de3151cd0609c7121463dfbdef00487bdf3d
 
-Entry 004
-Date: 24 July 2026
-Progress: 2% -> 3%
-Status: COMPLETE — design/product plan only
-Changes:
-- Defined theme, content, UI/UX and version-one features.
-- Selected Supabase Test OTP for development.
-- Added docs/WEBSITE_THEME_CONTENT_UI_UX_FEATURE_PLAN.txt.
-Plan commit: 1f6f80155ae3493ad3c66d50da4660aec4a4eb0b
-Tracker update: c6e9de3151cd0609c7121463dfbdef00487bdf3d
+Entry 005 — 3% -> 16%
+- Next.js application, responsive design system and Supabase schema foundation.
+- Application: 5ad7e14ed25574eaf1cc80fc834c4dfbfb3d7182
+- CSS/design: 37f3c056b013780aa9eb5c27801cb43856879b1a
+- Schema: 8794ca70a60a9efb9ebdf865beef748e0c767c69
+- Tracker: cebf8f9431fbecc3a1262e306c96c9633c1bc2c9
 
-Entry 005
+Entry 006 — 16% -> 18%
 Date: 24 July 2026
-Progress: 3% -> 16%
-Status: COMPLETE — first code foundation; production verification pending
-Changes:
-- Added Next.js/TypeScript/npm project foundation.
-- Added responsive public homepage, catalogue, product details and cart.
-- Added Supabase Test OTP customer/admin login clients.
-- Added Personal and Business onboarding.
-- Added wholesale information/application flow.
-- Added admin shell, dashboard and product-entry page.
-- Added category creation, channel pricing, inventory and image-upload integration code.
-- Added README, environment example and Supabase setup guide.
-- Added Supabase schema, RLS, storage buckets, seed data and owner bootstrap instructions.
-Commits:
-- Application scaffold: 5ad7e14ed25574eaf1cc80fc834c4dfbfb3d7182
-- Responsive design system: 37f3c056b013780aa9eb5c27801cb43856879b1a
-- Supabase schema foundation: 8794ca70a60a9efb9ebdf865beef748e0c767c69
-Validation:
-- Source parse check completed with global TypeScript compiler.
-- No project syntax errors observed.
-- Full dependency-based build not completed because npm registry requests timed out.
-- Supabase schema not executed.
+Status: BUILD VERIFIED; DEPLOYMENT REPAIR COMMITTED
+- Cloudflare CI installed dependencies.
+- Next.js compile and TypeScript passed.
+- 21 pages generated.
+- OpenNext Worker bundle generated.
+- Initial deploy failed with Cloudflare 10143 due generated self-service binding.
+- Explicit first-deploy-safe OpenNext/Wrangler configuration committed.
+- Fresh Cloudflare deploy pending.
 
 DECISION LOG
 ------------
-Decision 001 — Keep one permanent 0-to-100 tracker. APPROVED.
-Decision 002 — Owner controls photos, prices and availability through admin. APPROVED.
-Decision 003 — Use dedicated Supabase project/account. APPROVED.
-Decision 004 — Serve B2C and B2B in one platform. APPROVED.
-Decision 005 — Use phone number plus OTP. APPROVED.
-Decision 006 — Hide wholesale pricing until owner approval. APPROVED.
-Decision 007 — Launch in enquiry/manual-confirmation mode unless exact transaction model is legally approved. APPROVED.
-Decision 008 — New users choose Personal or Business; Admin is private and pre-authorised. APPROVED.
-Decision 009 — Use Next.js App Router, TypeScript, npm and custom CSS. APPROVED.
-Decision 010 — Use Supabase Test OTP during development. APPROVED.
-Decision 011 — Store version-one SQL in supabase/schema.sql and do not execute until frontend review. APPROVED.
-Decision 012 — Keep catalogue on demo data until schema and owner data are applied. APPROVED TEMPORARY IMPLEMENTATION.
+001. Keep one permanent 0-to-100 tracker. APPROVED.
+002. Owner controls photos, prices and availability through admin. APPROVED.
+003. Use dedicated Supabase project/account. APPROVED.
+004. Serve B2C and B2B in one platform. APPROVED.
+005. Use phone plus OTP. APPROVED.
+006. Hide wholesale pricing until owner approval. APPROVED.
+007. Launch in enquiry/manual-confirmation mode unless legally approved otherwise. APPROVED.
+008. New users choose Personal or Business; Admin is private. APPROVED.
+009. Use Next.js App Router, TypeScript and custom CSS. APPROVED.
+010. Use Supabase Test OTP during development. APPROVED.
+011. Keep SQL in supabase/schema.sql until frontend review. APPROVED.
+012. Use demo catalogue data until Supabase integration. TEMPORARY APPROVED.
+013. Deploy Next.js through explicit OpenNext/Wrangler configuration, not CI auto-migration. APPROVED.
+014. Keep Cloudflare commands as npm run build plus npx wrangler deploy. APPROVED.
 
 OPEN DECISIONS
 --------------
-- Confirm dedicated Supabase project URL and publishable key.
-- Confirm test phone numbers and OTP values.
-- Confirm owner admin phone number for bootstrap.
-- Confirm Cloudflare Workers/Pages deployment mode.
-- Confirm logo and real factory/product images.
-- Confirm licences, service regions, transport, age/identity requirements and B2B documents.
-- Confirm taxes, minimum values, cancellations/returns and current-site cutover approach.
-- Confirm production SMS provider and DLT setup.
+- Dedicated Supabase project URL and publishable key.
+- Test phone numbers and OTP values.
+- Owner-admin phone number for bootstrap.
+- Logo and real factory/product images.
+- Licences, service regions, transport and legal wording.
+- Taxes, minimum values and cancellation/returns approach.
+- Production SMS provider and DLT setup.
+- Custom-domain cutover timing.
 
 KNOWN RISKS
 -----------
-- Full Next.js build has not yet run with dependencies.
-- Supabase SQL has not yet been applied or tested.
-- Admin routes currently need server-side hardening beyond client role checks.
-- Product creation uses multiple inserts and should become transactional before production.
+- Fresh deployment after the Cloudflare fix has not yet been verified.
+- Supabase SQL has not been applied or tested.
+- Admin routes need server-side hardening beyond client role checks.
+- Product creation should become transactional.
 - Public catalogue still uses demo products.
-- Fireworks ordering, possession, transport and online-sale wording require specialist legal review.
-- Incorrect RLS could expose phone numbers, pricing or documents.
+- Fireworks sale, possession, transport and online wording require specialist review.
+- Incorrect RLS could expose phones, pricing or documents.
 - Images require compression and storage controls.
-- Current live website must not be replaced before staging acceptance.
+- Existing live site must remain until staging acceptance.
 
-SECRET-HANDLING RECORD
-----------------------
+SECRET-HANDLING RULES
+---------------------
 Never commit:
 - Supabase service-role key or database password.
-- SMS provider token/secret or OTP values.
+- SMS provider token or OTP values.
 - GitHub/Cloudflare tokens.
-- Production .env.
+- .env.local, .dev.vars or production secrets.
 - Customer exports or private business/licence documents.
-
-Safe pattern:
-- Commit .env.example with variable names only.
-- Keep real values in local/hosting/Supabase secrets.
-- Keep service-role credentials server-side only.
-- Keep business documents in a private bucket.
 
 NEXT EXACT STEPS
 ----------------
-1. Clone or pull main locally.
-2. Run npm install and commit package-lock.json.
-3. Run npm run typecheck, npm run lint and npm run build.
-4. Fix all build/type/lint issues and record them here.
-5. Review public UI locally.
-6. Only after review, run supabase/schema.sql in the dedicated project.
-7. Configure Supabase URL, publishable key and Test OTP numbers.
-8. Bootstrap owner_admin using the commented SQL.
-9. Test customer, business and admin flows.
-10. Replace demo catalogue with live Supabase data.
+1. Trigger a new Cloudflare deployment from latest main.
+2. Confirm npm run build generates .open-next successfully.
+3. Confirm npx wrangler deploy creates gowtham-fireworks without error 10143.
+4. Verify the workers.dev URL and all public/admin routes.
+5. Add Cloudflare build variables only when Supabase integration is ready.
+6. Review the public UI in a browser.
+7. Run supabase/schema.sql only in the dedicated Gowtham Fireworks project.
+8. Configure Test OTP numbers and bootstrap owner_admin.
+9. Test Personal, Business and Admin flows.
+10. Replace demo catalogue data with live Supabase queries.
 
 SESSION HANDOVER
 ----------------
 Date: 24 July 2026
-Current progress percentage: 16%
-Current branch: main
-Last completed task: First application and schema foundation committed.
-Files changed: Next.js app, components, lib, CSS, README, env example, Supabase SQL.
+Progress: 18%
+Branch: main
+Last completed task: Production build verified and Cloudflare first-deploy configuration repaired.
 Database migrations applied: None.
-Tests run: Source parse check only; full build unavailable because npm registry timed out.
-Deployment status: Not deployed.
-Known blocker: Dependencies and Supabase project are not yet connected/tested.
-Exact next step: Run npm install/typecheck/lint/build from a local clone, then connect the dedicated Supabase project.
+Build status: Next.js, TypeScript and OpenNext build passed in Cloudflare CI.
+Deployment status: First attempt failed with 10143; fix committed; redeploy pending.
+Exact next step: Retry Cloudflare deployment from latest main and verify the Worker URL.
 
 END OF PERMANENT PROJECT RECORD
 ===============================
