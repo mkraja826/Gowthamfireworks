@@ -1,0 +1,3 @@
+export default function RequestsPage() {
+  return <div className="admin-page"><div className="admin-page-heading"><div><small>Operations</small><h1>Retail and wholesale requests</h1><p>Customer requirements will remain separated by channel and preserve product-price snapshots.</p></div></div><div className="admin-columns"><section className="admin-panel"><div className="panel-heading"><h2>Retail requests</h2><span>0 new</span></div><div className="empty-state compact"><p>No retail requirements yet.</p></div></section><section className="admin-panel"><div className="panel-heading"><h2>Wholesale requests</h2><span>0 new</span></div><div className="empty-state compact"><p>No wholesale requirements yet.</p></div></section></div></div>;
+}
