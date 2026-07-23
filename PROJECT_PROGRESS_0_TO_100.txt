@@ -2,47 +2,57 @@ GOWTHAM FIREWORKS WEBSITE — PERMANENT PROJECT PROGRESS RECORD
 ==============================================================
 
 Repository: mkraja826/Gowthamfireworks
-Website: https://gowthamfireworksindustries.com/
+Existing website: https://gowthamfireworksindustries.com/
 Default branch: main
 Repository visibility: Private
 Record created: 24 July 2026
 Last updated: 24 July 2026
 Current overall progress: 18%
-Current phase: First application foundation, verified production build, deployment configuration repair
+Current phase: First application foundation complete; Cloudflare deployment repair awaiting successful verification
 
 PURPOSE
 -------
-This is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
+This file is the permanent source of truth for how the Gowtham Fireworks website is planned, designed, built, tested, deployed and maintained from 0% to 100%.
 
-Update this file after every meaningful architecture decision, database migration, code change, test, deployment, failure, fix or milestone. Never store secrets, OTP values, customer exports or private licence documents here.
+Update it after every meaningful architecture decision, database migration, code change, test, deployment, failure, fix or milestone. Preserve failures and fixes. Never store secrets, OTP values, customer exports or private licence documents here.
+
+NON-NEGOTIABLE RULES
+--------------------
+1. Never mark implementation complete until it is built and verified.
+2. Record exact files, migrations, commands and commits where possible.
+3. Preserve failures and their fixes.
+4. Never commit Supabase service-role keys, database passwords, OTPs, Cloudflare tokens, SMS secrets or production environment files.
+5. Keep the existing live website stable until the replacement passes staging acceptance.
+6. Use only the dedicated Gowtham Fireworks Supabase project/account.
+7. Keep public Personal/Business onboarding separate from private Admin access.
+8. Update the progress percentage only after a genuine verified milestone.
 
 PROJECT GOAL
 ------------
 Build one premium mobile-first platform serving:
 - B2C: factory to personal/retail customer.
 - B2B: factory to approved business/wholesaler.
-- Owner/admin: catalogue, price, stock, application, request and website-content control without code editing.
+- Owner/admin: catalogue, prices, photos, stock, applications, requests and website content without code editing.
 
 CONFIRMED PRODUCT DIRECTION
 ---------------------------
 Status: APPROVED
 
-1. Premium public landing page and searchable catalogue.
-2. Separate Personal/B2C and Business/B2B experiences in one application.
-3. Phone-number and OTP authentication.
-4. Supabase Test OTP during development and staging.
-5. New customers choose Personal or Business only after OTP verification.
-6. Personal accounts become retail_customer accounts.
-7. Business accounts become wholesale_applicant accounts until owner approval.
-8. Wholesale prices, MOQ and carton information remain hidden until approval.
-9. Admin is never offered as a public signup option.
-10. Pre-authorised admins use /admin/login and route directly to /admin after role verification.
-11. Owner controls product photos, retail/wholesale prices, stock and availability.
-12. Use a dedicated Gowtham Fireworks Supabase project only.
-13. Default transaction mode is ENQUIRY_ONLY / MANUAL_CONFIRMATION.
-14. No payment gateway in version one.
-15. Visual direction: “Sivakasi Midnight Festival”.
-16. Public UI is celebratory; admin UI is light, calm and operational.
+- Premium public landing page and searchable catalogue.
+- Separate Personal/B2C and Business/B2B experiences.
+- Phone-number and OTP authentication.
+- Supabase Test OTP for development and staging.
+- First-time customers choose Personal or Business only after OTP verification.
+- Personal creates retail_customer access.
+- Business creates wholesale_applicant access pending owner approval.
+- Wholesale prices, MOQ and carton information remain hidden until approval.
+- Admin is never shown as a public signup option.
+- Pre-authorised owner/admin users use /admin/login.
+- Owner controls product photos, retail/wholesale prices, stock and availability.
+- Default transaction mode: ENQUIRY_ONLY / MANUAL_CONFIRMATION.
+- No payment gateway in version one.
+- Visual direction: “Sivakasi Midnight Festival”.
+- Public UI is celebratory; admin UI is light, calm and operational.
 
 TECHNICAL STACK
 ---------------
@@ -50,16 +60,16 @@ Status: SELECTED AND SCAFFOLDED
 
 - Next.js App Router with TypeScript.
 - React 19.
-- npm scripts; Cloudflare CI may install with Bun when no npm lockfile is present.
+- npm scripts; Cloudflare CI may install dependencies with Bun.
 - Custom responsive CSS design system.
 - Supabase PostgreSQL.
 - Supabase Auth phone OTP.
-- Supabase Test OTP for development.
+- Supabase Test OTP during development.
 - Supabase Row Level Security plus trusted server checks.
 - @supabase/ssr browser integration.
-- Supabase Storage for product images and private business documents.
-- Cloudflare Workers using @opennextjs/cloudflare.
-- Wrangler for deployment.
+- Supabase Storage for public product images and private business documents.
+- Cloudflare Workers through @opennextjs/cloudflare.
+- Wrangler deployment.
 
 IMPLEMENTED ROUTES
 ------------------
@@ -81,8 +91,8 @@ Admin:
 - /admin/applications
 - /admin/requests
 
-IMPLEMENTED APPLICATION FEATURES
---------------------------------
+IMPLEMENTED APPLICATION FOUNDATION
+----------------------------------
 Public and retail:
 - Responsive homepage.
 - Retail and Wholesale entry cards.
@@ -93,7 +103,7 @@ Public and retail:
 - Browser-persisted retail cart.
 - Quantity controls and subtotal.
 - Factory-confirmation wording instead of payment wording.
-- Safety, factory-story, contact and footer sections.
+- Safety, factory story, contact and footer sections.
 
 Authentication/onboarding:
 - Supabase phone OTP request and verify client flow.
@@ -117,15 +127,15 @@ Admin foundation:
 - Stock and low-stock threshold.
 - Draft/active/archived and publish controls.
 - Category creation.
-- Product/application/request routes.
+- Application and request routes.
 
 SUPABASE SCHEMA FOUNDATION
 --------------------------
 Status: DRAFT COMMITTED; NOT EXECUTED
 File: supabase/schema.sql
-Commit: 8794ca70a60a9efb9ebdf865beef748e0c767c69
+Schema commit: 8794ca70a60a9efb9ebdf865beef748e0c767c69
 
-Tables and systems included:
+Included tables/systems:
 - profiles
 - user_roles
 - admin_allowlist
@@ -170,47 +180,52 @@ Do not run this SQL in CapDent, Astro or another Supabase project.
 
 CLOUDFLARE DEPLOYMENT CONFIGURATION
 -----------------------------------
-Status: FIRST-DEPLOY FIX COMMITTED; REDEPLOY VERIFICATION PENDING
+Status: THREE DEPLOYMENT FAILURES UNDERSTOOD AND FIXED; SUCCESSFUL DEPLOY STILL PENDING
+
+Cloudflare Git commands:
+- Build command: npm run cf:build
+- Deploy command: npx wrangler deploy
+
+package.json responsibilities:
+- npm run build -> next build
+- npm run cf:build -> opennextjs-cloudflare build
+- npm run cf:deploy -> wrangler deploy
+- npm run preview -> OpenNext build and preview
+- npm run deploy -> OpenNext build and Wrangler deploy
+
+Current wrangler.jsonc:
+- Worker name: gowthamfireworks
+- Main: .open-next/worker.js
+- Assets: .open-next/assets
+- Compatibility date: 2026-07-23
+- nodejs_compat enabled
+- Observability enabled
+- No WORKER_SELF_REFERENCE binding
+- No first-deploy R2 cache binding
 
 Files:
 - wrangler.jsonc
 - open-next.config.ts
 - docs/CLOUDFLARE_DEPLOYMENT.md
-
-Current Cloudflare Git build commands:
-- Build command: npm run build
-- Deploy command: npx wrangler deploy
-
-package.json behaviour:
-- npm run build -> opennextjs-cloudflare build
-- npm run build:next -> next build
-- npm run cf:deploy -> wrangler deploy
-- npm run preview -> OpenNext build and preview
-- npm run deploy -> OpenNext build and Wrangler deploy
-
-The checked-in wrangler.jsonc uses:
-- Worker name: gowtham-fireworks
-- Main: .open-next/worker.js
-- Assets: .open-next/assets
-- nodejs_compat
-- Observability enabled
-- No WORKER_SELF_REFERENCE service binding
-- No R2 incremental-cache binding for the first deployment
+- docs/DEPLOYMENT_FAILURE_002_RECURSIVE_OPENNEXT_BUILD.md
+- docs/DEPLOYMENT_FAILURE_003_WORKER_NAME_AND_DATE.md
 
 VALIDATION STATUS
 -----------------
-Status: PRODUCTION BUILD PASSED; DEPLOYMENT FIX NOT YET RE-VERIFIED
+Status: NEXT.JS, TYPESCRIPT AND OPENNEXT BUILD VERIFIED; WORKER DEPLOYMENT PENDING
 
-Cloudflare build run on 23 July 2026 completed:
-- Dependencies installed successfully with Bun.
+Verified in Cloudflare CI:
+- Dependencies installed successfully.
+- Correct Cloudflare command `npm run cf:build` executed.
+- OpenNext invoked `$ next build` exactly once after recursive fix.
 - Next.js compiled successfully.
 - TypeScript completed successfully.
-- 21 static/SSG pages generated successfully.
-- OpenNext Cloudflare build completed successfully.
-- .open-next/worker.js generated.
-- Static assets bundled and uploaded before deployment validation.
+- 21 static/SSG pages generated.
+- `.open-next/worker.js` generated.
+- OpenNext build completed.
+- Static assets uploaded.
 
-Generated routes verified in build output:
+Generated routes observed:
 - /
 - /admin
 - /admin/applications
@@ -220,58 +235,81 @@ Generated routes verified in build output:
 - /business/apply
 - /cart
 - /catalogue
-- /catalogue/[slug] with generated product paths
+- /catalogue/[slug]
 - /login
 - /onboarding/account-type
 - /onboarding/personal
 - /wholesale
 
-DEPLOYMENT FAILURE 001
-----------------------
-Date: 23 July 2026
-Status: ROOT CAUSE FOUND AND CONFIG FIX COMMITTED
-
-Observed failure:
-- Cloudflare error code: 10143.
-- Generated service binding WORKER_SELF_REFERENCE referenced Worker gowtham-fireworks.
-- The Worker did not yet exist, so the first deployment was rejected.
+DEPLOYMENT FAILURE 001 — GENERATED SELF-SERVICE BINDING
+-------------------------------------------------------
+Observed:
+- Cloudflare code 10143.
+- Auto-generated WORKER_SELF_REFERENCE pointed to a Worker that did not exist.
 
 Cause:
-- Repository had no committed wrangler.jsonc or open-next.config.ts.
-- Running npx wrangler deploy in CI triggered automatic Next.js/OpenNext migration.
-- The migration generated R2 incremental-cache resources and a self-service binding.
-- Cloudflare requires a service-binding target Worker to exist before deploying a Worker that references it.
+- No committed OpenNext/Wrangler configuration during first deploy.
+- Wrangler auto-migration generated a self-service binding and cache resources.
 
-Fix committed:
-- Added explicit wrangler.jsonc without a self-service binding.
-- Added explicit open-next.config.ts.
-- Added @opennextjs/cloudflare and wrangler as project devDependencies.
-- Changed npm run build to generate .open-next output.
-- Preserved existing mandatory deployment command npx wrangler deploy.
-- Added .open-next and .dev.vars exclusions to .gitignore.
-- Added docs/CLOUDFLARE_DEPLOYMENT.md.
+Fix:
+- Added explicit wrangler.jsonc and open-next.config.ts.
+- Removed self-service binding for first deployment.
+- Added OpenNext/Wrangler dependencies.
+- Added deployment documentation.
 
-Fix commits:
-- package/OpenNext scripts: b76c9b98a1e4a0afd254052ae8e66eb6790e51d2
-- wrangler.jsonc: 718dde21bd356e9b50288f1494f67b8463c2ec77
-- open-next.config.ts: 2becdf32c97a226b7c52a48580f8a9b7945f91d0
-- .gitignore: 69034a0a69f684c2c7cd456fe34cc9a6208d0ee3
-- default OpenNext build command: edde9f71534533994fe91be8b9b6e4a1ba7af084
-- deployment guide: 4394b616a80a7786c2af07e234bcffc9e5d03536
+Relevant commits:
+- b76c9b98a1e4a0afd254052ae8e66eb6790e51d2
+- 718dde21bd356e9b50288f1494f67b8463c2ec77
+- 2becdf32c97a226b7c52a48580f8a9b7945f91d0
+- 69034a0a69f684c2c7cd456fe34cc9a6208d0ee3
 
-Pending verification:
-- Trigger a fresh Cloudflare deployment from the latest main commit.
-- Confirm Worker gowtham-fireworks is created successfully.
-- Confirm no WORKER_SELF_REFERENCE binding appears.
-- Verify the workers.dev URL and all major routes.
+DEPLOYMENT FAILURE 002 — RECURSIVE OPENNEXT BUILD
+-------------------------------------------------
+Observed:
+- Deployment ran longer than 20 minutes.
+- Repeated “OpenNext — Cloudflare build” headings.
+- Repeated `$ opennextjs-cloudflare build` lines.
+
+Cause:
+- package `build` script pointed to OpenNext.
+- OpenNext internally invoked the package build script, causing recursion.
+
+Fix:
+- `build` restored to `next build`.
+- Added `cf:build` for OpenNext.
+- Cloudflare Build command changed to `npm run cf:build`.
+
+Relevant commits:
+- 0c9c44f65919c6b99373be27452085f67dcb0337
+- 4490c8083a6482e9e21b65977c3248fc7de7c6d2
+- 824ff2c8b5024b043f172b7d679ef2b7afeee5a9
+
+DEPLOYMENT FAILURE 003 — WORKER NAME AND FUTURE DATE
+----------------------------------------------------
+Observed after successful build:
+- Cloudflare warning: config Worker name `gowtham-fireworks` did not match connected project `gowthamfireworks`.
+- Cloudflare code 10021: compatibility date 2026-07-24 was in the future from Cloudflare UTC.
+
+Cause:
+- Worker name mismatch between wrangler config and connected Cloudflare project.
+- Deployment occurred before 24 July in Cloudflare UTC.
+
+Fix:
+- Worker name changed to `gowthamfireworks`.
+- Compatibility date changed to `2026-07-23`.
+
+Relevant commits:
+- Wrangler fix: 11203bd53706a7c6e43fb62f390365833587ddf0
+- Deployment guide: 3b0f39781fd7ca8849d61021b97f81230db348fc
+- Failure record: d2878973c1fc04b3bf35c514e13177ecb927ce62
 
 ROADMAP — 0% TO 100%
 ---------------------
 
 PHASE 0 — PROJECT FOUNDATION (0%–5%)
 Status: COMPLETE FOR FIRST SCAFFOLD
-- Repository, tracker, Next.js foundation, README, env example and secret rules complete.
-- Cloudflare/OpenNext deployment files committed.
+- Repository, tracker, framework, README, environment example and secret rules complete.
+- Cloudflare/OpenNext files committed.
 - package-lock.json still pending.
 
 PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
@@ -287,16 +325,16 @@ Status: FIRST IMPLEMENTATION PASS COMPLETE
 PHASE 3 — DATABASE AND SECURITY FOUNDATION (20%–31%)
 Status: SQL DRAFT COMPLETE; EXECUTION PENDING
 - Schema, RLS, storage and onboarding RPC draft complete.
-- Apply to dedicated project, fix SQL and run RLS tests next.
+- Dedicated-project execution and RLS tests pending.
 
 PHASE 4 — PHONE OTP, PROFILE AND ACCOUNT SHELL (31%–40%)
 Status: FRONTEND FOUNDATION COMPLETE; INTEGRATION PENDING
 - Login/onboarding UI and client flow complete.
-- Supabase test-number configuration, session protection and routing tests pending.
+- Test-number configuration, session protection and routing tests pending.
 
 PHASE 5 — ADMIN PRODUCT, PRICE, CATEGORY AND CONTENT MANAGEMENT (40%–54%)
 Status: FIRST CREATE-PRODUCT FLOW CODED; NOT TESTED
-- Product/category create foundation complete.
+- Product/category creation foundation complete.
 - Edit, delete, bulk actions, transaction safety and content editor pending.
 
 PHASE 6 — IMAGE AND BUSINESS DOCUMENT MANAGEMENT (54%–61%)
@@ -329,19 +367,18 @@ Status: PLANNED
 
 PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
 Status: STARTED
-- Cloudflare/Next/OpenNext production build passed.
+- Next.js, TypeScript and OpenNext production build passed.
 - Browser, Supabase, RLS, OTP, accessibility and security tests remain.
 
 PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
-Status: DEPLOYMENT CONFIGURED; FIRST SUCCESSFUL DEPLOY PENDING
-- First deploy failed due generated self-binding.
-- Configuration fix committed.
-- Fresh deploy and route verification pending.
+Status: CONFIGURATION REPAIRED; FIRST SUCCESSFUL WORKER DEPLOY PENDING
+- Three deployment failures diagnosed and fixed.
+- Fresh deployment and route verification pending.
 
 BUILD AND CHANGE HISTORY
 ------------------------
 Entry 001 — 0% -> 1%
-- Repository located and tracker created.
+- Repository located and permanent tracker created.
 - Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
 
 Entry 002 — 1% -> 2%
@@ -360,22 +397,25 @@ Entry 004 — 2% -> 3%
 - Tracker: c6e9de3151cd0609c7121463dfbdef00487bdf3d
 
 Entry 005 — 3% -> 16%
-- Next.js application, responsive design system and Supabase schema foundation.
+- Next.js application, responsive design and Supabase schema foundation.
 - Application: 5ad7e14ed25574eaf1cc80fc834c4dfbfb3d7182
 - CSS/design: 37f3c056b013780aa9eb5c27801cb43856879b1a
 - Schema: 8794ca70a60a9efb9ebdf865beef748e0c767c69
 - Tracker: cebf8f9431fbecc3a1262e306c96c9633c1bc2c9
 
 Entry 006 — 16% -> 18%
-Date: 24 July 2026
-Status: BUILD VERIFIED; DEPLOYMENT REPAIR COMMITTED
-- Cloudflare CI installed dependencies.
-- Next.js compile and TypeScript passed.
-- 21 pages generated.
-- OpenNext Worker bundle generated.
-- Initial deploy failed with Cloudflare 10143 due generated self-service binding.
-- Explicit first-deploy-safe OpenNext/Wrangler configuration committed.
-- Fresh Cloudflare deploy pending.
+- Cloudflare CI verified Next.js, TypeScript and OpenNext build.
+- Deployment failure 001 diagnosed and explicit configuration added.
+
+Entry 007 — remained 18%
+- Deployment failure 002 recursive build diagnosed and corrected.
+- Build command split into `build` and `cf:build`.
+
+Entry 008 — remained 18%
+- Correct OpenNext build completed in Cloudflare CI.
+- Deployment failure 003 exposed Worker name mismatch and future UTC compatibility date.
+- Worker name and compatibility date corrected.
+- Successful Worker deployment still pending.
 
 DECISION LOG
 ------------
@@ -391,8 +431,10 @@ DECISION LOG
 010. Use Supabase Test OTP during development. APPROVED.
 011. Keep SQL in supabase/schema.sql until frontend review. APPROVED.
 012. Use demo catalogue data until Supabase integration. TEMPORARY APPROVED.
-013. Deploy Next.js through explicit OpenNext/Wrangler configuration, not CI auto-migration. APPROVED.
-014. Keep Cloudflare commands as npm run build plus npx wrangler deploy. APPROVED.
+013. Deploy through explicit OpenNext/Wrangler configuration, not CI auto-migration. APPROVED.
+014. Use Cloudflare Build command `npm run cf:build` and Deploy command `npx wrangler deploy`. APPROVED.
+015. Match wrangler Worker name exactly to Cloudflare connected-project name. APPROVED.
+016. Use a compatibility date that is not ahead of Cloudflare UTC. APPROVED.
 
 OPEN DECISIONS
 --------------
@@ -407,36 +449,27 @@ OPEN DECISIONS
 
 KNOWN RISKS
 -----------
-- Fresh deployment after the Cloudflare fix has not yet been verified.
+- Successful Worker deployment after failure 003 is not yet verified.
 - Supabase SQL has not been applied or tested.
 - Admin routes need server-side hardening beyond client role checks.
 - Product creation should become transactional.
 - Public catalogue still uses demo products.
 - Fireworks sale, possession, transport and online wording require specialist review.
-- Incorrect RLS could expose phones, pricing or documents.
+- Incorrect RLS could expose phone numbers, pricing or documents.
 - Images require compression and storage controls.
 - Existing live site must remain until staging acceptance.
-
-SECRET-HANDLING RULES
----------------------
-Never commit:
-- Supabase service-role key or database password.
-- SMS provider token or OTP values.
-- GitHub/Cloudflare tokens.
-- .env.local, .dev.vars or production secrets.
-- Customer exports or private business/licence documents.
 
 NEXT EXACT STEPS
 ----------------
 1. Trigger a new Cloudflare deployment from latest main.
-2. Confirm npm run build generates .open-next successfully.
-3. Confirm npx wrangler deploy creates gowtham-fireworks without error 10143.
-4. Verify the workers.dev URL and all public/admin routes.
-5. Add Cloudflare build variables only when Supabase integration is ready.
-6. Review the public UI in a browser.
-7. Run supabase/schema.sql only in the dedicated Gowtham Fireworks project.
-8. Configure Test OTP numbers and bootstrap owner_admin.
-9. Test Personal, Business and Admin flows.
+2. Keep Build command `npm run cf:build`.
+3. Keep Deploy command `npx wrangler deploy`.
+4. Confirm no Worker-name warning and no Cloudflare code 10021.
+5. Confirm Worker `gowthamfireworks` deploys and returns a workers.dev URL.
+6. Verify public and admin routes.
+7. Review the UI in a browser.
+8. Run supabase/schema.sql only in the dedicated Gowtham Fireworks project after UI review.
+9. Configure Test OTP numbers and bootstrap owner_admin.
 10. Replace demo catalogue data with live Supabase queries.
 
 SESSION HANDOVER
@@ -444,11 +477,11 @@ SESSION HANDOVER
 Date: 24 July 2026
 Progress: 18%
 Branch: main
-Last completed task: Production build verified and Cloudflare first-deploy configuration repaired.
+Last completed task: Fixed Cloudflare Worker name mismatch and future compatibility date.
 Database migrations applied: None.
 Build status: Next.js, TypeScript and OpenNext build passed in Cloudflare CI.
-Deployment status: First attempt failed with 10143; fix committed; redeploy pending.
-Exact next step: Retry Cloudflare deployment from latest main and verify the Worker URL.
+Deployment status: Three failures diagnosed and fixed; fresh deployment pending.
+Exact next step: Deploy latest main and verify Worker `gowthamfireworks`.
 
 END OF PERMANENT PROJECT RECORD
 ===============================
