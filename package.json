@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "fetch:flashbillr-products": "node scripts/fetch-flashbillr-products.mjs",
     "import:flashbillr": "node scripts/import-flashbillr.mjs",
     "import:flashbillr:dry": "node scripts/import-flashbillr.mjs",
     "import:flashbillr:stage": "node scripts/import-flashbillr.mjs --stage",
