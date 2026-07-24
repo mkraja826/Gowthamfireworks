@@ -1,0 +1,42 @@
+GOWTHAM FIREWORKS — FLASHBILLR LIVE EXPORT AND SAMPLE DRY-RUN SUCCESS
+====================================================================
+
+Date: 24 July 2026
+Status: SUCCESS; full-catalogue dry-run pending
+
+Owner-local verification
+------------------------
+- FlashBillr direct backend authentication succeeded after compatibility fixes.
+- Tenant-verifying exporter retrieved 235 products.
+- Export file created locally at imports/flashbillr-products.json.
+- Importer detected the product array at root.products.
+- Five-product sample dry-run completed.
+- Sample result: 5 valid, 0 invalid.
+- No Supabase connection or database write occurred.
+
+Sample mapping observed
+-----------------------
+- Stable FlashBillr product IDs were detected.
+- Product names and numeric SKUs were detected.
+- Category mapped to ONE SOUND CRACKERS.
+- Selling prices were detected.
+- Current stock mapped as zero for the first five products.
+
+Review notes
+------------
+- Source names include strings such as 4"" LAKSHMI; source punctuation should be reviewed before publication.
+- The first five products have zero stock and will normalize to out_of_stock unless source inventory is corrected.
+- Do not stage or apply yet. Run the full 235-product dry-run and review validation failures, duplicate SKU/name risk, missing prices, stock distribution, category distribution and image coverage first.
+
+Next exact step
+---------------
+Run:
+  npm run import:flashbillr:dry -- --file imports/flashbillr-products.json
+
+Then inspect the newest imports/reports/*-dry-run.json report.
+
+Security
+--------
+- Credentials and JWT remained local.
+- Product export remains ignored by Git.
+- Supabase was not accessed.
