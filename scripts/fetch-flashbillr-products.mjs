@@ -64,8 +64,90 @@ function apiBaseUrl() {
   return requireValue("FLASHBILLR_API_URL", process.env.FLASHBILLR_API_URL).replace(/\/+$/, "");
 }
 
+function getPath(object, path) {
+  return path.split(".").reduce((value, key) => value?.[key], object);
+}
+
+function firstPath(object, paths) {
+  for (const path of paths) {
+    const value = getPath(object, path);
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return null;
+}
+
+function responseShape(value) {
+  if (!value || typeof value !== "object") return `response type: ${typeof value}`;
+  const topLevel = Object.keys(value);
+  const nested = [];
+  for (const key of topLevel) {
+    const child = value[key];
+    if (child && typeof child === "object" && !Array.isArray(child)) {
+      nested.push(`${key}.{${Object.keys(child).join(", ")}}`);
+    }
+  }
+  return [
+    `top-level fields: ${topLevel.length ? topLevel.join(", ") : "(none)"}`,
+    nested.length ? `nested fields: ${nested.join("; ")}` : null,
+  ].filter(Boolean).join("; ");
+}
+
+function safeDetail(value) {
+  if (value === undefined || value === null || value === "") return "No error details returned.";
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value, (key, nestedValue) => {
+      if (/token|password|secret|authorization/i.test(key)) return "[REDACTED]";
+      return nestedValue;
+    });
+  } catch {
+    return String(value);
+  }
+}
+
 function normalizeBearerToken(token) {
-  return token.startsWith("Bearer ") ? token.slice("Bearer ".length).trim() : token.trim();
+  const text = String(token).trim();
+  return text.startsWith("Bearer ") ? text.slice("Bearer ".length).trim() : text;
+}
+
+function extractToken(payload) {
+  if (typeof payload === "string" && payload.trim()) return payload.trim();
+  return firstPath(payload, [
+    "token",
+    "accessToken",
+    "access_token",
+    "jwt",
+    "authToken",
+    "auth_token",
+    "data.token",
+    "data.accessToken",
+    "data.access_token",
+    "data.jwt",
+    "data.authToken",
+    "data.auth_token",
+    "result.token",
+    "result.accessToken",
+    "result.access_token",
+    "result.jwt",
+    "payload.token",
+    "payload.accessToken",
+    "response.token",
+    "response.accessToken",
+    "tokens.accessToken",
+    "tokens.access_token",
+  ]);
+}
+
+function extractUser(payload) {
+  return firstPath(payload, [
+    "user",
+    "data.user",
+    "result.user",
+    "payload.user",
+    "response.user",
+    "data.profile",
+    "profile",
+  ]);
 }
 
 function bearerHeaders() {
@@ -96,37 +178,67 @@ async function authenticate() {
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
+
   const body = await response.text();
   let payload = null;
   try {
     payload = body ? JSON.parse(body) : null;
   } catch {
-    payload = null;
+    payload = body || null;
   }
 
   if (!response.ok) {
-    const detail = payload?.message || payload?.error || body || response.statusText;
-    throw new Error(`FlashBillr login failed: ${response.status} ${detail}`);
-  }
-  if (!payload?.token) {
-    throw new Error("FlashBillr login succeeded but no JWT token was returned.");
+    const detail = firstPath(payload, [
+      "message",
+      "error.message",
+      "error",
+      "data.message",
+      "data.error.message",
+      "data.error",
+    ]) ?? payload ?? response.statusText;
+    throw new Error(`FlashBillr login failed: ${response.status} ${safeDetail(detail)}`);
   }
 
-  runtimeToken = normalizeBearerToken(payload.token);
-  loginUser = payload.user ?? null;
+  const token = extractToken(payload);
+  if (!token) {
+    throw new Error(
+      `FlashBillr login returned HTTP ${response.status}, but the exporter could not locate a JWT. ${responseShape(payload)}`
+    );
+  }
+
+  runtimeToken = normalizeBearerToken(token);
+  loginUser = extractUser(payload);
   console.log("FlashBillr login successful. JWT kept in memory only.");
 }
 
 async function fetchJson(url) {
   const response = await fetch(url, { headers: bearerHeaders() });
-  if (!response.ok) {
-    const body = await response.text();
-    if (response.status === 401 || response.status === 403) {
-      throw new Error(`FlashBillr rejected the credentials (${response.status}). Check the admin email/password or replace FLASHBILLR_API_TOKEN.\n${body}`);
-    }
-    throw new Error(`FlashBillr request failed: ${response.status} ${response.statusText}\n${body}`);
+  const body = await response.text();
+  let payload = null;
+  try {
+    payload = body ? JSON.parse(body) : null;
+  } catch {
+    payload = body || null;
   }
-  return response.json();
+
+  if (!response.ok) {
+    const detail = firstPath(payload, [
+      "message",
+      "error.message",
+      "error",
+      "data.message",
+      "data.error.message",
+      "data.error",
+    ]) ?? payload ?? response.statusText;
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(
+        `FlashBillr rejected the credentials (${response.status}). Check the admin email/password or replace FLASHBILLR_API_TOKEN.\n${safeDetail(detail)}`
+      );
+    }
+    throw new Error(`FlashBillr request failed: ${response.status} ${response.statusText}\n${safeDetail(detail)}`);
+  }
+
+  return payload;
 }
 
 function verifyUserStore(user, expectedStoreId, sourceLabel) {
@@ -141,7 +253,9 @@ function verifyUserStore(user, expectedStoreId, sourceLabel) {
   if (actualStoreId && String(actualStoreId) !== String(expectedStoreId)) {
     throw new Error(`${sourceLabel} belongs to store ${actualStoreId}, not expected store ${expectedStoreId}. Export blocked.`);
   }
-  return actualStoreId ? { id: String(actualStoreId), name: store?.name ?? null, slug: store?.slug ?? null } : null;
+  return actualStoreId
+    ? { id: String(actualStoreId), name: store?.name ?? null, slug: store?.slug ?? null }
+    : null;
 }
 
 async function verifyStore() {
@@ -153,14 +267,39 @@ async function verifyStore() {
 
   const profilePath = process.env.FLASHBILLR_PROFILE_PATH || DEFAULT_PROFILE_PATH;
   const payload = await fetchJson(`${apiBaseUrl()}/${profilePath.replace(/^\/+/, "")}`);
-  const profileUser = payload?.user ?? payload;
+  const profileUser = extractUser(payload) ?? firstPath(payload, ["data", "result", "payload"]) ?? payload;
   const profileStore = verifyUserStore(profileUser, expectedStoreId, "Profile");
+
   if (!profileStore) {
-    throw new Error("FlashBillr profile did not return a store ID. Tenant verification failed, so export was blocked.");
+    throw new Error(
+      `FlashBillr profile did not return a store ID. Tenant verification failed, so export was blocked. ${responseShape(payload)}`
+    );
   }
 
   console.log(`Verified store: ${profileStore.name || expectedStoreId} (${expectedStoreId})`);
   return profileStore;
+}
+
+function extractProductsPayload(payload) {
+  const products = firstPath(payload, [
+    "products",
+    "data.products",
+    "result.products",
+    "payload.products",
+    "response.products",
+    "data.items",
+    "items",
+  ]);
+  const pagination = firstPath(payload, [
+    "pagination",
+    "data.pagination",
+    "result.pagination",
+    "payload.pagination",
+    "response.pagination",
+    "meta.pagination",
+    "data.meta.pagination",
+  ]) ?? {};
+  return { products, pagination };
 }
 
 async function fetchAllProducts() {
@@ -180,24 +319,43 @@ async function fetchAllProducts() {
     console.log(`Fetching products page ${page}${totalPages ? ` of ${totalPages}` : ""}...`);
 
     const payload = await fetchJson(url.toString());
-    if (!Array.isArray(payload?.products)) {
-      throw new Error("Unexpected FlashBillr response: expected a products array.");
+    const extracted = extractProductsPayload(payload);
+    if (!Array.isArray(extracted.products)) {
+      throw new Error(
+        `Unexpected FlashBillr response: expected a products array. ${responseShape(payload)}`
+      );
     }
 
-    products.push(...payload.products);
-    const pagination = payload.pagination ?? {};
-    totalPages = Number(pagination.pages ?? pagination.totalPages ?? pagination.total_pages ?? 1);
-    reportedTotal = Number(pagination.total ?? products.length);
+    products.push(...extracted.products);
+    const pagination = extracted.pagination ?? {};
+    totalPages = Number(
+      pagination.pages ??
+      pagination.totalPages ??
+      pagination.total_pages ??
+      pagination.pageCount ??
+      1
+    );
+    reportedTotal = Number(pagination.total ?? pagination.totalCount ?? products.length);
 
-    if (!payload.products.length || page >= totalPages) break;
+    if (!extracted.products.length || page >= totalPages) break;
     page += 1;
   }
 
   if (totalPages && totalPages > maxPages) {
-    throw new Error(`FlashBillr reported ${totalPages} pages, exceeding FLASHBILLR_MAX_PAGES=${maxPages}. Export stopped safely.`);
+    throw new Error(
+      `FlashBillr reported ${totalPages} pages, exceeding FLASHBILLR_MAX_PAGES=${maxPages}. Export stopped safely.`
+    );
   }
 
-  return { products, pagination: { page: 1, limit: pageSize, total: reportedTotal ?? products.length, pages: totalPages ?? 1 } };
+  return {
+    products,
+    pagination: {
+      page: 1,
+      limit: pageSize,
+      total: reportedTotal ?? products.length,
+      pages: totalPages ?? 1,
+    },
+  };
 }
 
 async function main() {
@@ -206,7 +364,9 @@ async function main() {
 
   if (args.help) {
     console.log("Usage: npm run fetch:flashbillr-products -- --output imports/flashbillr-products.json");
-    console.log("Provide either FLASHBILLR_API_TOKEN or FLASHBILLR_ADMIN_EMAIL plus FLASHBILLR_ADMIN_PASSWORD in .env.import.local.");
+    console.log(
+      "Provide either FLASHBILLR_API_TOKEN or FLASHBILLR_ADMIN_EMAIL plus FLASHBILLR_ADMIN_PASSWORD in .env.import.local."
+    );
     return;
   }
 
@@ -215,12 +375,19 @@ async function main() {
   const result = await fetchAllProducts();
   const outputFile = resolve(String(args.output || DEFAULT_OUTPUT_FILE));
   mkdirSync(dirname(outputFile), { recursive: true });
-  writeFileSync(outputFile, JSON.stringify({
-    source: "flashbillr",
-    store,
-    fetchedAt: new Date().toISOString(),
-    ...result,
-  }, null, 2));
+  writeFileSync(
+    outputFile,
+    JSON.stringify(
+      {
+        source: "flashbillr",
+        store,
+        fetchedAt: new Date().toISOString(),
+        ...result,
+      },
+      null,
+      2
+    )
+  );
 
   console.log(`Exported ${result.products.length} products.`);
   console.log(`Saved: ${outputFile}`);
