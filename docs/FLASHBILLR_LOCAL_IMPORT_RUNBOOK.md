@@ -2,103 +2,158 @@
 
 Date: 24 July 2026
 
-This workflow imports FlashBillr product data into the dedicated Gowtham Fireworks Supabase project without exposing Supabase credentials to ChatGPT, GitHub, Cloudflare browser code, or the public website.
+This workflow copies FlashBillr product data into the dedicated Gowtham Fireworks Supabase project without exposing credentials to ChatGPT, GitHub, Cloudflare browser code, or the public website.
+
+## Confirmed FlashBillr contract
+
+Source reviewed: `Aathirajan/flashbillr_admin`.
+
+- API base is supplied by the deployed backend URL.
+- Axios adds `/api` to the backend base.
+- Store-admin products endpoint: `GET /api/storeadmin/products`.
+- Authentication: `Authorization: Bearer <JWT>`.
+- The store is selected from the authenticated store-admin token, not from a public store-ID query parameter.
+- Profile verification endpoint: `GET /api/auth/profile`.
+- Product response wrapper: `{ products, pagination }`.
+- Pagination fields: `page`, `limit`, `total`, `pages`.
+- Product fields include `id`, `name`, `description`, `category`, `brand`, `sku`, `mrp`, `currentStock`, `contentType`, `sellingPrice`, `gstRate`, `youtubeUrl`, `images`, and `createdAt`.
+
+The importer verifies that the JWT belongs to store `cmfmpccfc000do5hjfkyh4ene` before exporting products.
 
 ## Safety model
 
 - FlashBillr is an upstream source only.
 - The public website never calls FlashBillr.
-- All imports run locally from the owner's Windows computer.
-- Dry-run is the default.
-- Staging writes raw records but does not change live catalogue products.
-- Apply requires the exact confirmation phrase `APPLY_FLASHBILLR_TO_SUPABASE`.
-- New imported products are always `draft` and `is_published = false`.
+- All export/import commands run locally on the owner's Windows computer.
+- Product export and dry-run do not connect to Supabase.
+- Staging writes raw records but does not modify live catalogue products.
+- Apply requires `APPLY_FLASHBILLR_TO_SUPABASE`.
+- New products are created as `draft`, `is_published = false`.
 - Products are never automatically hard-deleted.
-- Product images are recorded in normalized staging data but are not copied to Supabase Storage by importer version 1.
+- JWTs and Supabase secret keys remain only in `.env.import.local`.
+- Images are recorded in staging but are not copied into Supabase Storage by importer version 1.
 
 ## Prerequisites
 
-1. Clone or pull `mkraja826/Gowthamfireworks` locally.
-2. Use the dedicated Gowtham Fireworks Supabase project only.
-3. Run `supabase/schema.sql` in that project.
-4. Run `supabase/migrations/20260724070000_flashbillr_catalogue_import.sql` after the main schema.
-5. Install dependencies with `npm install`.
+1. Pull the latest `mkraja826/Gowthamfireworks` main branch.
+2. Run `npm install`.
+3. For staging/apply only, use the dedicated Gowtham Fireworks Supabase project.
+4. Run `supabase/schema.sql` in that project.
+5. Run `supabase/migrations/20260724070000_flashbillr_catalogue_import.sql` after the main schema.
 
-## Local environment
-
-Copy the template:
+## Step 1 — update the local repo
 
 ```powershell
-Copy-Item .env.import.example .env.import.local
+Set-Location C:\Gowthamfireworks
+git pull origin main
+npm install
+Copy-Item .env.import.example .env.import.local -Force
 ```
 
-Edit `.env.import.local` and provide only on your own computer:
+`.env.import.local` is ignored by Git.
+
+## Step 2 — obtain a current FlashBillr store-admin JWT
+
+1. Log in to the working FlashBillr Admin dashboard as the Gowtham Fireworks store admin.
+2. Press `F12`.
+3. Open the **Console** tab.
+4. Run:
+
+```javascript
+copy(localStorage.getItem('token'))
+```
+
+5. Open `.env.import.local`:
+
+```powershell
+notepad .env.import.local
+```
+
+6. Paste the token after:
 
 ```env
-SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-SUPABASE_SECRET_KEY=sb_secret_YOUR_PRIVATE_SERVER_KEY
-
-FLASHBILLR_STORE_ID=cmfmpccfc000do5hjfkyh4ene
-FLASHBILLR_API_URL=https://flashbillr-mumbai-562462089707.asia-south1.run.app
+FLASHBILLR_API_TOKEN=
 ```
 
-Never commit `.env.import.local`.
+Do not add quotes unless the token itself requires them. Never commit or share this file.
 
-## Recommended first import: JSON-file mode
+## Step 3 — export all FlashBillr products locally
 
-Because the exact FlashBillr product endpoint and response contract are not yet confirmed, first export the working product response from the existing FlashBillr storefront.
+Run:
 
-1. Open the storefront in Chrome.
-2. Press F12 and open Network.
-3. Filter Fetch/XHR.
-4. Reload the page.
-5. Open the request that returns products.
-6. Save the response as:
+```powershell
+npm run fetch:flashbillr-products
+```
+
+The exporter will:
+
+1. call `/api/auth/profile`;
+2. verify the role is store admin;
+3. verify the token's store ID equals `cmfmpccfc000do5hjfkyh4ene`;
+4. request `/api/storeadmin/products` page by page;
+5. combine all pages;
+6. save the response to:
 
 ```text
 imports/flashbillr-products.json
 ```
 
-The `imports/*.json` path is ignored by Git.
+Expected final output resembles:
 
-## Step 1 — dry-run
+```text
+Verified store: <store name> (cmfmpccfc000do5hjfkyh4ene)
+Fetching products page 1...
+Exported <count> products.
+Saved: C:\Gowthamfireworks\imports\flashbillr-products.json
+No Supabase connection was made.
+```
+
+## Step 4 — dry-run five products
 
 ```powershell
-npm run import:flashbillr:dry -- --file imports/flashbillr-products.json
+npm run import:flashbillr:dry -- `
+  --file imports/flashbillr-products.json `
+  --limit 5
 ```
 
 Dry-run:
 
-- detects the product array;
-- normalizes common field names;
-- validates external ID, name, price, MRP and stock;
+- detects the `products` array;
+- normalizes source fields;
+- validates external ID, name, selling price, MRP and stock;
 - prints a preview table;
-- writes a local report in `imports/reports/`;
+- writes a report under `imports/reports/`;
 - does not connect to Supabase.
 
-Use `--limit 5` for an initial sample:
+Review names, SKUs, categories, selling prices, MRP and stock before continuing.
+
+## Step 5 — dry-run the full export
 
 ```powershell
-npm run import:flashbillr:dry -- --file imports/flashbillr-products.json --limit 5
+npm run import:flashbillr:dry -- `
+  --file imports/flashbillr-products.json
 ```
 
-## Step 2 — staging import
+Do not stage data while validation failures remain unexplained.
 
-After the dry-run looks correct:
+## Step 6 — stage raw records in Supabase
+
+Only after the main schema and import migration have been applied:
 
 ```powershell
-npm run import:flashbillr:stage -- --file imports/flashbillr-products.json
+npm run import:flashbillr:stage -- `
+  --file imports/flashbillr-products.json
 ```
 
 This creates:
 
-- one row in `catalogue_import_runs`;
-- one raw staging row per product in `catalogue_import_items`;
-- validation errors for invalid records.
+- one `catalogue_import_runs` record;
+- one raw `catalogue_import_items` record per product;
+- normalized values and validation errors.
 
 It does not create or update live catalogue products.
 
-Review in Supabase SQL Editor:
+Review:
 
 ```sql
 select *
@@ -112,10 +167,10 @@ select external_id, action, normalized_payload, validation_errors
 from public.catalogue_import_items
 where entity_type = 'product'
 order by id
-limit 20;
+limit 50;
 ```
 
-## Step 3 — apply to live catalogue as drafts
+## Step 7 — apply validated records as hidden drafts
 
 Only after reviewing staging:
 
@@ -125,92 +180,36 @@ npm run import:flashbillr:apply -- `
   --confirm APPLY_FLASHBILLR_TO_SUPABASE
 ```
 
-The importer applies valid products in this order:
+The importer applies:
 
-1. category;
-2. brand;
-3. product;
-4. external mapping;
+1. categories;
+2. brands;
+3. products;
+4. external mappings;
 5. product import controls;
 6. retail channel settings;
 7. inventory;
 8. retail price history.
 
-Imported products remain unpublished drafts for owner review.
+Imported products remain unpublished until reviewed by the owner.
 
-## API mode after the endpoint is known
+## Token expiry
 
-The importer also supports direct server-side fetching. Configure either a full URL:
+When export returns `401` or `403`:
 
-```env
-FLASHBILLR_PRODUCTS_URL=https://example/products?storeId={storeId}
-```
+1. log in to FlashBillr Admin again;
+2. run `copy(localStorage.getItem('token'))` again;
+3. replace `FLASHBILLR_API_TOKEN` in `.env.import.local`;
+4. rerun the export command.
 
-or base URL plus path:
+## Tenant mismatch protection
 
-```env
-FLASHBILLR_PRODUCTS_PATH=/api/stores/{storeId}/products
-```
-
-Optional API configuration:
+If the JWT belongs to another store, export stops before writing a JSON file. Do not disable verification except during controlled debugging.
 
 ```env
-FLASHBILLR_STORE_ID_QUERY_PARAM=storeId
-FLASHBILLR_STORE_ID_HEADER=x-store-id
-FLASHBILLR_API_TOKEN=
-FLASHBILLR_AUTH_HEADER=Authorization
-FLASHBILLR_HEADERS_JSON={"x-client":"gowtham-fireworks"}
+FLASHBILLR_VERIFY_STORE=true
 ```
 
-Then run the same dry/stage/apply commands without `--file`.
+## Images
 
-## Supported common source fields
-
-The version 1 normalizer checks common aliases for:
-
-- external ID: `id`, `productId`, `itemId`, `sku`, `code`, `barcode`;
-- name: `name`, `productName`, `itemName`, `title`;
-- category and brand objects or names;
-- pack size, unit or UOM;
-- retail/selling/sale price;
-- MRP/list/original price;
-- stock/quantity/available quantity;
-- product image URLs;
-- updated timestamps.
-
-The real FlashBillr response must still be reviewed before treating the mapping as production-final.
-
-## Imported table behavior
-
-- Stable FlashBillr IDs are saved in `external_entity_mappings`.
-- Existing products are matched by mapping first and SKU second.
-- Owner override flags in `product_import_controls` prevent future imports from overwriting selected fields.
-- Retail price history is preserved: the current price is closed and a new effective price is inserted only when values change.
-- Stock may update when `sync_stock` is enabled.
-- Publication is never enabled automatically.
-
-## Troubleshooting
-
-### Could not find an array of product objects
-
-The saved JSON may contain an unexpected wrapper. Inspect the file and locate the product array path. The importer searches common wrappers such as `products`, `items`, `data`, `results`, `result`, `catalogue`, and `inventory` up to four levels deep.
-
-### Missing stable external ID
-
-The product needs an `id`, product/item ID, SKU, code, or barcode. Do not apply records that cannot be mapped reliably across future imports.
-
-### Supabase table not found
-
-Run both SQL files in the correct order and only in the dedicated Gowtham Fireworks project.
-
-### Apply blocked
-
-This is intentional. Include:
-
-```text
---confirm APPLY_FLASHBILLR_TO_SUPABASE
-```
-
-### Images do not appear
-
-Importer version 1 does not copy remote images to Supabase Storage. Image download, validation, compression, and Storage upload are a separate safe phase after the real response structure is confirmed.
+The product response contains image URLs. Version 1 stores them in raw/normalized staging and mapping metadata. A later phase will download, validate, compress and copy them into Supabase Storage so the website never depends permanently on FlashBillr image URLs.
