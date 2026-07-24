@@ -9,7 +9,7 @@ Cloudflare staging Worker: https://gowthamfireworks.karthikraja826.workers.dev
 Record created: 24 July 2026
 Last updated: 24 July 2026
 Current overall progress: 30%
-Current phase: Dedicated Supabase foundation and the first FlashBillr catalogue import are complete. All 235 products are safely stored as draft/unpublished records. Local Next.js and OpenNext Cloudflare production builds pass. The next action is a staging-only Worker deployment, followed by owner/admin and RLS verification before replacing demo catalogue data.
+Current phase: The dedicated Supabase catalogue foundation and first 235-product draft import are complete. Staging deployment and route smoke tests pass. Server-side admin role protection and the first searchable draft-review queue are coded, but the new code still requires local build, authenticated owner verification and staging redeployment before it is marked complete.
 
 PURPOSE
 -------
@@ -143,24 +143,21 @@ FLASHBILLR ONE-WAY IMPORT
 -------------------------
 Status: FIRST LIVE EXPORT, VALIDATION, STAGING AND GUARDED DRAFT APPLY COMPLETE
 
-Confirmed backend contract:
+Confirmed source:
 - API base: https://flashbillr-mumbai-562462089707.asia-south1.run.app
-- Login: POST /api/auth/login with email/password.
+- Store ID: cmfmpccfc000do5hjfkyh4ene
+- Login: POST /api/auth/login.
 - Profile: GET /api/auth/profile.
 - Products: GET /api/storeadmin/products?page=<n>&limit=<n>.
-- Authentication: Authorization: Bearer <JWT>.
-- Product wrapper: products plus pagination.
+- Authentication: Authorization Bearer token.
 - Store scope comes from the authenticated store-admin account/JWT.
-
-Confirmed Gowtham Fireworks source:
-- Store ID: cmfmpccfc000do5hjfkyh4ene
 
 Hosted-admin outage fallback:
 - Hosted FlashBillr admin frontend was unavailable.
-- Exporter can log in directly through /api/auth/login using local credentials.
+- Exporter can log in directly through the API using local credentials.
 - Returned JWT stays in process memory only.
-- Existing FLASHBILLR_API_TOKEN mode remains supported.
-- Export is blocked unless role is store admin and tenant ID matches.
+- Existing token mode remains supported.
+- Export is blocked unless role and tenant ID match.
 
 Observed/fixed export failures:
 - Initial direct login returned HTTP 401 with unreadable structured error.
@@ -180,34 +177,23 @@ Confirmed import results:
 - Updated: 0.
 - Failed: 0.
 - Final verification: 235 products, 235 drafts, 235 unpublished, 235 mappings, 235 import controls, 235 products with prices, 235 inventory rows and 235 retail channel rows.
-- An intermediate count of 95 was observed while the per-record apply was still running; final verification proved it was not a partial failure.
+- An intermediate count of 95 was observed while apply was still running; final verification proved it was not a partial failure.
 
 Success records:
 - docs/FLASHBILLR_STAGING_SUCCESS_2026-07-24.md
 - docs/FLASHBILLR_APPLY_SUCCESS_2026-07-24.md
-- docs/FLASHBILLR_FINAL_DATABASE_VERIFICATION_2026-07-24.md
+- docs/FLASHBILLR_DATABASE_VERIFICATION_SUCCESS_2026-07-24.md
 
 Import safety behaviour:
 - Export and dry-run do not connect to Supabase.
 - Stage writes only audit/staging rows.
-- Apply requires APPLY_FLASHBILLR_TO_SUPABASE.
+- Apply requires an exact confirmation phrase.
 - New products are created with status draft and is_published false.
 - Stable external IDs are preserved.
 - Owner sync overrides are respected.
 - Price history is preserved.
 - Missing external records are never hard-deleted automatically.
 - Product images are not yet copied into Supabase Storage.
-
-Key import commits:
-- Import migration: 03005e4a0c816b3cc9ee886c074d36d221c6d6f5
-- Import architecture: e48793fbb10a48f082fcd4494a8b822c429f5769
-- Importer core: b659032e06feff5f5e9585d3374c58aeb4e6e6c9
-- Direct credential login fallback: 942748355bee0a9d581a1008c84fbcf2a14d5662
-- Live-response compatibility fix: b98ce51a9a360e6fa493b45aa21ce955cf8a636a
-- Export/dry-run success record: 739f35623fb1248afa298ec056d97d551042fce9
-- Staging success record: de5e72fe159b5b525b73e5ad2433d458f5e6f1f7
-- Apply success record: b55addac89b110490ee1acbfee6badd662eed0f8
-- Final database verification record: 22e426a64bbcc42f1e9c4376ca06e58bca4cc632
 
 FRONTEND ENVIRONMENT
 --------------------
@@ -220,29 +206,70 @@ Configured locally:
 - NEXT_PUBLIC_SITE_URL=http://localhost:3000 for local development.
 - NEXT_PUBLIC_WHATSAPP_NUMBER in international digits-only format.
 
-Current catalogue state:
-- Public /catalogue still reads lib/demo-data.ts.
+Current public catalogue state:
+- /catalogue still reads lib/demo-data.ts.
 - Six demo products and six SSG demo detail paths remain active.
 - The 235 imported products are not yet queried by the public website.
 - Draft/unpublished products must not be exposed during frontend integration.
 
+ADMIN AUTHENTICATION AND PROTECTION
+-----------------------------------
+Status: ROLE BOOTSTRAP IN PROGRESS; NEW SERVER GUARD CODED BUT NOT YET BUILT/VERIFIED
+
+Observed login result:
+- Supabase OTP verification succeeded.
+- The verified user was rejected by the admin page because no owner_admin/staff row was visible in user_roles.
+- Likely cause: the auth user existed before the allowlist entry or automatic role assignment did not run for that existing user.
+- Manual user_roles backfill was provided; completion is not yet confirmed.
+
+New code:
+- lib/supabase/server.ts creates a cookie-aware Supabase server client using only the public URL and publishable key.
+- app/admin/(dashboard)/layout.tsx now calls auth.getUser(), reads user_roles and redirects non-owner/non-staff users to /admin/login.
+- Admin login itself remains outside the protected dashboard route group.
+
+Security commits:
+- Server client: 1c4434885792c0c53e748fb3e075b2442004fb53
+- Admin route guard: 559161979be2adc71c25d8a8b647f5dee4196d1c
+
+ADMIN PRODUCT REVIEW
+--------------------
+Status: FIRST SEARCHABLE DRAFT-REVIEW QUEUE CODED; BUILD AND LIVE DATA VERIFICATION PENDING
+
+Implemented in code:
+- Protected product screen queries products, categories, brands, inventory and retail price relationships from Supabase.
+- Summary cards show total, awaiting review, published and currently visible counts.
+- Search supports product name, SKU, slug, category and brand.
+- Filters support awaiting review, all, published and archived.
+- Rows show product identity, SKU, pack size, category, brand, retail price, MRP, stock and state.
+- New product creation is forced to status draft and is_published false.
+- The previous Publish immediately control was removed.
+- Publishing remains intentionally separate and unimplemented until review/security acceptance.
+- Responsive CSS module added for desktop and mobile review queues.
+
+Review commits:
+- Product review page: 7aab313d85f0a255ec101f55b43cbf1cc0102496
+- Review styles: 4a052f1dca71f30c8c84b403187b896e2ac5c386
+
 BUILD VERIFICATION
 ------------------
-Status: PASS
+Previous verified status: PASS
 
-Verified locally on 24 July 2026:
+Verified before the latest admin changes:
 - npm run build passed.
 - Next.js 16.2.11 Turbopack compiled successfully.
 - TypeScript passed.
 - 21 routes/static pages generated.
 - npm run cf:build passed.
 - OpenNext generated .open-next/worker.js.
-- Static assets, cache assets, middleware and default server function bundled successfully.
-- No production-domain change was performed.
+
+Required now:
+- Pull the latest admin changes.
+- Run npm run typecheck and npm run build.
+- Do not mark the new admin guard/review queue complete until both pass.
 
 CLOUDFLARE DEPLOYMENT
 ---------------------
-Status: FIRST STAGING DEPLOYMENT COMPLETE; UPDATED ENV-AWARE BUNDLE READY FOR STAGING REDEPLOY
+Status: SECOND STAGING DEPLOYMENT AND ROUTE SMOKE TEST COMPLETE; LATEST ADMIN CODE NOT YET DEPLOYED
 
 Configuration:
 - Build: npm run cf:build
@@ -254,41 +281,57 @@ Configuration:
 - nodejs_compat and observability enabled.
 
 First successful staging deployment:
-- URL: https://gowthamfireworks.karthikraja826.workers.dev
 - Version ID: 8f78e53d-ada2-4db3-8029-c55fdccc20e2
 - Worker startup: 31 ms
 - Record: docs/DEPLOYMENT_SUCCESS_001_WORKERS_DEV.md
-- Commit: 0068ab3baf484a482a7b3c21f31dcd33cc6538e4
+
+Second successful staging deployment:
+- Version ID: 105fd563-d68b-49fa-905b-98fcf620db8c
+- Worker startup: 28 ms
+- Four changed static assets uploaded; 28 assets reused.
+- Record commit: 2064664146b404a30f6ebd16754f451daaaf9143
+- Non-blocking Node DEP0190 warning observed after successful deployment.
+
+Staging smoke test:
+- / returned HTTP 200.
+- /catalogue returned HTTP 200.
+- /cart returned HTTP 200.
+- /login returned HTTP 200.
+- /admin/login returned HTTP 200.
+- Record commit: 98ca1d645f7b9d15eeef056c6179300ab1726ebe
+
+Production domain status:
+- https://gowthamfireworksindustries.com/ remains unchanged.
 
 DEPLOYMENT FAILURE HISTORY
 --------------------------
 FAILURE 001 — WORKER SELF REFERENCE
 - Cloudflare 10143 from generated WORKER_SELF_REFERENCE.
-- Fixed with explicit wrangler/open-next config and removal of first-deploy self binding.
+- Fixed with explicit Wrangler/OpenNext config and removal of the first-deploy self binding.
 
 FAILURE 002 — RECURSIVE OPENNEXT BUILD
 - package build script called OpenNext, which called build recursively.
 - Fixed by restoring build=next build and using separate cf:build.
 
 FAILURE 003 — WORKER NAME / FUTURE DATE
-- Worker name mismatch and future UTC compatibility date caused Cloudflare 10021.
-- Fixed with name gowthamfireworks and date 2026-07-23.
+- Worker name mismatch and a future UTC compatibility date caused Cloudflare 10021.
+- Fixed with name gowthamfireworks and compatibility date 2026-07-23.
 
 ROADMAP — 0% TO 100%
 ---------------------
 PHASE 0 (0%–5%) — Foundation: COMPLETE FOR FIRST SCAFFOLD.
 PHASE 1 (5%–12%) — Requirements/legal architecture: SUBSTANTIALLY DOCUMENTED.
 PHASE 2 (12%–25%) — Design/UX: REDESIGN DEPLOYED; final browser/accessibility/real assets pending.
-PHASE 3 (25%–31%) — Database/security: SCHEMA, IMPORT MIGRATION AND 235-PRODUCT DRAFT IMPORT COMPLETE; owner/admin and full RLS tests pending.
-PHASE 4 (31%–40%) — OTP/profile/account shell: FRONTEND FOUNDATION COMPLETE; integration pending.
-PHASE 5 (40%–54%) — Admin catalogue/content: FIRST CREATE FLOW CODED; real draft review, CRUD, bulk and transactional safety pending.
+PHASE 3 (25%–31%) — Database/security: SCHEMA, IMPORT MIGRATION AND 235-PRODUCT DRAFT IMPORT COMPLETE; owner role, public draft check and full RLS tests pending; server admin guard coded awaiting verification.
+PHASE 4 (31%–40%) — OTP/profile/account shell: FRONTEND FOUNDATION COMPLETE; owner role bootstrap and full integration pending.
+PHASE 5 (40%–54%) — Admin catalogue/content: CREATE FLOW AND FIRST DRAFT-REVIEW QUEUE CODED; build verification, editing, reviewed flags, bulk actions and transactional safety pending.
 PHASE 6 (54%–61%) — Image/documents: STORAGE FOUNDATION CODED; image copy/compression/private docs pending.
 PHASE 7 (61%–69%) — Public landing: DEPLOYED ON DEMO DATA; live Supabase and real assets pending.
 PHASE 8 (69%–78%) — Catalogues: RETAIL DEMO FOUNDATION COMPLETE; live queries/wholesale pricing pending.
 PHASE 9 (78%–87%) — Cart/requests: LOCAL CART REDESIGNED; persistence/submission/server validation pending.
 PHASE 10 (87%–92%) — Admin business/requests: SHELL ONLY.
 PHASE 11 (92%–95%) — Settings/SEO/notifications/analytics: PLANNED.
-PHASE 12 (95%–98%) — Testing/security/performance: STARTED EARLY; Next.js/OpenNext build, deploy, export, validation, stage and apply checks passed.
+PHASE 12 (95%–98%) — Testing/security/performance: STARTED EARLY; previous Next.js/OpenNext build, deployment, import and smoke tests passed; latest admin code pending tests.
 PHASE 13 (98%–100%) — Domain switch: STAGING LIVE; production domain unchanged.
 
 BUILD AND CHANGE HISTORY
@@ -310,61 +353,64 @@ Entry 014 — 26% -> 27%: live FlashBillr login/export succeeded; 235 products e
 Entry 015 — 27% -> 28%: dedicated Supabase schema and import migration applied; all 235 products staged successfully.
 Entry 016 — 28% -> 29%: guarded apply completed; 235 inserted, zero failed; all data relationships verified at 235.
 Entry 017 — 29% -> 30%: local frontend environment configured safely; Next.js and OpenNext Cloudflare production builds passed with all 21 routes.
+Entry 018 — remained 30%: second workers.dev deployment and five-route HTTP 200 smoke test passed.
+Entry 019 — remained 30%: cookie-aware server Supabase client, owner/staff admin route guard and searchable 235-product draft-review queue coded; verification pending.
 
 OPEN DECISIONS
 --------------
-- Owner-admin identity and allowlist entry.
-- Test OTP numbers and owner-admin phone.
+- Confirm owner-admin role assignment for the existing verified Auth user.
+- Production SMS/DLT provider and final OTP approach.
 - Final logo, product and factory images.
-- Which imported products should be published first.
+- Which imported products should be reviewed/published first.
 - Licences, service regions, transport and legal wording.
 - Taxes, minimum values, cancellation/returns approach.
-- Production SMS/DLT and verified WhatsApp number.
+- Verified public WhatsApp number.
 - Custom-domain cutover timing.
 
 KNOWN RISKS
 -----------
-- Owner/admin access and complete RLS tests remain pending.
-- Public publishable-key draft visibility should be explicitly verified before live catalogue code is enabled.
-- Apply is per-record rather than one database transaction; partial failure is recorded, but a transactional improvement remains desirable.
+- Owner role assignment and authenticated admin access are not yet confirmed.
+- The new server admin guard and product review queue are not yet built or deployed.
+- Public publishable-key draft visibility still needs an explicit recorded zero-row result.
+- Complete RLS tests remain pending.
+- Apply is per-record rather than one database transaction; partial failure is recorded, but transactional improvement remains desirable.
 - Product images are not yet copied to Supabase Storage.
 - Public catalogue still uses demo data.
 - Browser/mobile/accessibility acceptance is incomplete.
 - Real product/factory imagery is pending.
-- Admin server-side hardening remains incomplete.
 - Fireworks legal/transport wording requires specialist review.
 - Existing production domain must remain stable until final acceptance.
 
 NEXT EXACT STEPS
 ----------------
-1. Pull the latest main branch locally so this progress record is current.
-2. Deploy the already-built OpenNext bundle only to the existing workers.dev staging Worker.
-3. Verify the staging homepage, catalogue, cart, login and WhatsApp links.
-4. Confirm the production domain remains unchanged.
-5. Verify with the public publishable key that draft products return zero rows.
-6. Add the owner-admin identity/allowlist entry and test authenticated admin access.
-7. Build an authenticated admin draft-review view for all 235 imported products.
-8. Review names, categories, prices, stock and visibility before publishing any records.
-9. Copy approved product images into Supabase Storage.
-10. Replace demo catalogue data with public Supabase queries only after RLS and product review pass.
+1. Pull main locally.
+2. Run npm run typecheck and npm run build for the new server guard and product review queue.
+3. Confirm the verified owner Auth user has owner_admin in public.user_roles.
+4. Log in through /admin/login and confirm /admin opens.
+5. Open /admin/products and confirm all 235 draft products load.
+6. In a signed-out browser, confirm /admin and /admin/products redirect to /admin/login.
+7. Record PUBLIC_VISIBLE_PRODUCTS=0 using the publishable key.
+8. If all checks pass, run npm run cf:build and deploy only to workers.dev staging.
+9. Smoke-test protected admin access on staging.
+10. Begin owner review of product names, categories, prices and stock; do not publish yet.
 
 SESSION HANDOVER
 ----------------
 Date: 24 July 2026
 Progress: 30%
 Branch: main
-Last completed task: Local Next.js and OpenNext Cloudflare production builds passed after the dedicated Supabase publishable environment and public WhatsApp configuration were added locally.
+Last completed coding task: Added a cookie-aware Supabase server client, server-side owner/staff protection for the admin dashboard route group, and a searchable draft-review queue for imported products. The code is committed but not yet locally built or staged.
 Database migrations applied: supabase/schema.sql and supabase/migrations/20260724070000_flashbillr_catalogue_import.sql in the dedicated Gowtham Fireworks project.
 FlashBillr stage run: bd37839b-cc4e-4bc6-b672-34939f70fb46
 FlashBillr apply run: ea872062-2595-4f87-a670-6f50b8bb377b
 Final import state: 235 inserted, 0 updated, 0 failed; all 235 remain draft and unpublished.
 Supabase connected through ChatGPT: No. Owner configured and ran it locally without sharing secrets.
-Build status: Next.js and TypeScript PASS; OpenNext Cloudflare bundle PASS; .open-next/worker.js generated.
-Deployment status: Existing workers.dev staging deployment remains live; updated local bundle is ready to redeploy.
-Staging URL: https://gowthamfireworks.karthikraja826.workers.dev
-Current Cloudflare Version ID before redeploy: 8f78e53d-ada2-4db3-8029-c55fdccc20e2
+Previous build status: Next.js, TypeScript and OpenNext PASS before the latest admin changes.
+Latest staging deployment: SUCCESS, Version ID 105fd563-d68b-49fa-905b-98fcf620db8c.
+Latest staging smoke test: five key routes returned HTTP 200.
 Production domain status: unchanged.
-Exact next step: Pull main, then deploy the current .open-next bundle to the existing workers.dev staging Worker with npx wrangler deploy.
+Latest code commits: 1c4434885792c0c53e748fb3e075b2442004fb53, 559161979be2adc71c25d8a8b647f5dee4196d1c, 7aab313d85f0a255ec101f55b43cbf1cc0102496 and 4a052f1dca71f30c8c84b403187b896e2ac5c386.
+Exact next step: Pull main, then run npm run typecheck and npm run build.
 
 END OF PERMANENT PROJECT RECORD
 ===============================
