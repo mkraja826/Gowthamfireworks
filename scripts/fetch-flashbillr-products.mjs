@@ -5,9 +5,13 @@ import { dirname, resolve } from "node:path";
 import process from "node:process";
 
 const DEFAULT_ENV_FILE = ".env.import.local";
+const DEFAULT_LOGIN_PATH = "/api/auth/login";
 const DEFAULT_PRODUCTS_PATH = "/api/storeadmin/products";
 const DEFAULT_PROFILE_PATH = "/api/auth/profile";
 const DEFAULT_OUTPUT_FILE = "imports/flashbillr-products.json";
+
+let runtimeToken = null;
+let loginUser = null;
 
 function parseArgs(argv) {
   const result = {};
@@ -60,14 +64,57 @@ function apiBaseUrl() {
   return requireValue("FLASHBILLR_API_URL", process.env.FLASHBILLR_API_URL).replace(/\/+$/, "");
 }
 
+function normalizeBearerToken(token) {
+  return token.startsWith("Bearer ") ? token.slice("Bearer ".length).trim() : token.trim();
+}
+
 function bearerHeaders() {
-  const token = requireValue("FLASHBILLR_API_TOKEN", process.env.FLASHBILLR_API_TOKEN);
-  const authorization = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-  const headers = { Accept: "application/json", Authorization: authorization };
+  const token = runtimeToken || process.env.FLASHBILLR_API_TOKEN;
+  const normalized = normalizeBearerToken(requireValue("FlashBillr JWT or admin credentials", token));
+  const headers = { Accept: "application/json", Authorization: `Bearer ${normalized}` };
   if (process.env.FLASHBILLR_HEADERS_JSON) {
     Object.assign(headers, JSON.parse(process.env.FLASHBILLR_HEADERS_JSON));
   }
   return headers;
+}
+
+async function authenticate() {
+  if (process.env.FLASHBILLR_API_TOKEN) {
+    runtimeToken = normalizeBearerToken(process.env.FLASHBILLR_API_TOKEN);
+    console.log("Using FlashBillr JWT from .env.import.local.");
+    return;
+  }
+
+  const email = requireValue("FLASHBILLR_ADMIN_EMAIL", process.env.FLASHBILLR_ADMIN_EMAIL);
+  const password = requireValue("FLASHBILLR_ADMIN_PASSWORD", process.env.FLASHBILLR_ADMIN_PASSWORD);
+  const loginPath = process.env.FLASHBILLR_LOGIN_PATH || DEFAULT_LOGIN_PATH;
+  const loginUrl = `${apiBaseUrl()}/${loginPath.replace(/^\/+/, "")}`;
+
+  console.log("Signing in to FlashBillr directly through the backend API...");
+  const response = await fetch(loginUrl, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const body = await response.text();
+  let payload = null;
+  try {
+    payload = body ? JSON.parse(body) : null;
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    const detail = payload?.message || payload?.error || body || response.statusText;
+    throw new Error(`FlashBillr login failed: ${response.status} ${detail}`);
+  }
+  if (!payload?.token) {
+    throw new Error("FlashBillr login succeeded but no JWT token was returned.");
+  }
+
+  runtimeToken = normalizeBearerToken(payload.token);
+  loginUser = payload.user ?? null;
+  console.log("FlashBillr login successful. JWT kept in memory only.");
 }
 
 async function fetchJson(url) {
@@ -75,36 +122,45 @@ async function fetchJson(url) {
   if (!response.ok) {
     const body = await response.text();
     if (response.status === 401 || response.status === 403) {
-      throw new Error(`FlashBillr rejected the JWT (${response.status}). Log in again and replace FLASHBILLR_API_TOKEN.\n${body}`);
+      throw new Error(`FlashBillr rejected the credentials (${response.status}). Check the admin email/password or replace FLASHBILLR_API_TOKEN.\n${body}`);
     }
     throw new Error(`FlashBillr request failed: ${response.status} ${response.statusText}\n${body}`);
   }
   return response.json();
 }
 
+function verifyUserStore(user, expectedStoreId, sourceLabel) {
+  if (!user) return null;
+  const role = user.role;
+  const store = user.store ?? null;
+  const actualStoreId = store?.id ?? user.storeId ?? user.store_id;
+
+  if (role && !["storeAdmin", "STOREADMIN", "storeadmin"].includes(role)) {
+    throw new Error(`${sourceLabel} role is ${role}; a FlashBillr store-admin account is required.`);
+  }
+  if (actualStoreId && String(actualStoreId) !== String(expectedStoreId)) {
+    throw new Error(`${sourceLabel} belongs to store ${actualStoreId}, not expected store ${expectedStoreId}. Export blocked.`);
+  }
+  return actualStoreId ? { id: String(actualStoreId), name: store?.name ?? null, slug: store?.slug ?? null } : null;
+}
+
 async function verifyStore() {
   const expectedStoreId = requireValue("FLASHBILLR_STORE_ID", process.env.FLASHBILLR_STORE_ID);
-  if (!envBoolean("FLASHBILLR_VERIFY_STORE", true)) return { id: expectedStoreId, name: null };
+  const loginStore = verifyUserStore(loginUser, expectedStoreId, "Login response");
+  if (!envBoolean("FLASHBILLR_VERIFY_STORE", true)) {
+    return loginStore || { id: expectedStoreId, name: null, slug: null };
+  }
 
   const profilePath = process.env.FLASHBILLR_PROFILE_PATH || DEFAULT_PROFILE_PATH;
   const payload = await fetchJson(`${apiBaseUrl()}/${profilePath.replace(/^\/+/, "")}`);
-  const user = payload?.user ?? payload;
-  const role = user?.role;
-  const store = user?.store ?? null;
-  const actualStoreId = store?.id ?? user?.storeId ?? user?.store_id;
-
-  if (role && !["storeAdmin", "STOREADMIN", "storeadmin"].includes(role)) {
-    throw new Error(`JWT role is ${role}; a FlashBillr store-admin token is required.`);
-  }
-  if (!actualStoreId) {
+  const profileUser = payload?.user ?? payload;
+  const profileStore = verifyUserStore(profileUser, expectedStoreId, "Profile");
+  if (!profileStore) {
     throw new Error("FlashBillr profile did not return a store ID. Tenant verification failed, so export was blocked.");
   }
-  if (String(actualStoreId) !== String(expectedStoreId)) {
-    throw new Error(`JWT belongs to store ${actualStoreId}, not expected store ${expectedStoreId}. Export blocked.`);
-  }
 
-  console.log(`Verified store: ${store?.name || expectedStoreId} (${expectedStoreId})`);
-  return { id: expectedStoreId, name: store?.name ?? null, slug: store?.slug ?? null };
+  console.log(`Verified store: ${profileStore.name || expectedStoreId} (${expectedStoreId})`);
+  return profileStore;
 }
 
 async function fetchAllProducts() {
@@ -150,9 +206,11 @@ async function main() {
 
   if (args.help) {
     console.log("Usage: npm run fetch:flashbillr-products -- --output imports/flashbillr-products.json");
+    console.log("Provide either FLASHBILLR_API_TOKEN or FLASHBILLR_ADMIN_EMAIL plus FLASHBILLR_ADMIN_PASSWORD in .env.import.local.");
     return;
   }
 
+  await authenticate();
   const store = await verifyStore();
   const result = await fetchAllProducts();
   const outputFile = resolve(String(args.output || DEFAULT_OUTPUT_FILE));
