@@ -2,13 +2,14 @@ GOWTHAM FIREWORKS WEBSITE — PERMANENT PROJECT PROGRESS RECORD
 ==============================================================
 
 Repository: mkraja826/Gowthamfireworks
-Existing website: https://gowthamfireworksindustries.com/
+Existing live website: https://gowthamfireworksindustries.com/
+Staging Worker: https://gowthamfireworks.karthikraja826.workers.dev
 Default branch: main
 Repository visibility: Private
 Record created: 24 July 2026
 Last updated: 24 July 2026
-Current overall progress: 24%
-Current phase: Modern Sivakasi Market public redesign implemented; Cloudflare verification pending
+Current overall progress: 25%
+Current phase: Modern Sivakasi Market redesign successfully deployed to Cloudflare staging; browser acceptance and dedicated Supabase integration are next.
 
 PURPOSE
 -------
@@ -25,7 +26,7 @@ NON-NEGOTIABLE RULES
 5. Keep the existing live website stable until the replacement passes staging acceptance.
 6. Use only the dedicated Gowtham Fireworks Supabase project/account.
 7. Keep public Personal/Business onboarding separate from private Admin access.
-8. Update progress percentage only after a genuine implemented milestone.
+8. Update progress percentage only after a genuine implemented or verified milestone.
 9. Do not deploy development notes, fake testimonials, fake serviceability claims or unverified licence claims.
 10. Do not publicly advertise Owner/Admin login.
 11. Use real product/factory images before final production acceptance; branded pack mockups are staging visuals only.
@@ -59,11 +60,11 @@ Status: APPROVED
 
 TECHNICAL STACK
 ---------------
-Status: SELECTED AND SCAFFOLDED
+Status: SELECTED, SCAFFOLDED AND DEPLOYED TO STAGING
 
 - Next.js App Router with TypeScript.
 - React 19.
-- npm scripts; Cloudflare CI may install dependencies with Bun.
+- npm scripts; Cloudflare CI currently installs dependencies with Bun.
 - Manrope UI font and Fraunces selected display font through next/font.
 - Custom responsive CSS design system.
 - Supabase PostgreSQL.
@@ -148,7 +149,7 @@ DESIGN HISTORY
 DESIGN 001 — SIVAKASI MIDNIGHT FESTIVAL
 Status: REJECTED FOR PRODUCTION
 
-Problems found in senior UI/UX review:
+Problems found:
 - Looked like a generic dark SaaS/startup template.
 - Hero described platform architecture instead of customer value.
 - Product/category visuals used emojis.
@@ -158,12 +159,12 @@ Problems found in senior UI/UX review:
 - Catalogue filters were weak and partially redundant.
 - Product details and cart lacked a guided commerce journey.
 
-Review:
+Senior review:
 - docs/UI_UX_SENIOR_REVIEW_AND_REDESIGN_PLAN.md
 - Commit: 8150b19c312ea88ad2568b4d090ebddff2c6f8c8
 
 DESIGN 002 — MODERN SIVAKASI MARKET
-Status: IMPLEMENTED IN SOURCE; BUILD/DEPLOY/BROWSER VERIFICATION PENDING
+Status: IMPLEMENTED, BUILT AND DEPLOYED TO STAGING
 
 Principles:
 - Warm-white product-led surfaces.
@@ -176,7 +177,7 @@ Principles:
 - Direct customer language.
 - Strong mobile navigation and requirement-cart journey.
 
-Implemented public redesign:
+Implemented:
 - Added Manrope and Fraunces through next/font.
 - Added skip navigation and focus-visible styling.
 - Rebuilt header with catalogue search, reduced navigation, support, Account and Cart.
@@ -193,7 +194,7 @@ Implemented public redesign:
 - Redesigned cart with Cart -> Phone -> Contact -> Review -> Submitted steps.
 - Preserved Personal/Business/Wholesale architecture and compliance-first wording.
 
-Primary redesign files:
+Primary files:
 - app/layout.tsx
 - app/globals.css
 - app/page.tsx
@@ -209,36 +210,13 @@ Primary redesign files:
 Implementation record:
 - docs/REDESIGN_IMPLEMENTATION_2026-07-24.md
 
-Redesign commits:
-- Product pack component: d4293fbf7eaab8a39c6bf316abe8e0cbc23b3d41
-- Typography/metadata: b57dd103082801b912dd4a92a557b5e1abc3a19d
-- Header/mobile navigation: 140bce70c52d330ab7c1f42cb02d3fe1ceec6c18
-- Footer: 4a0157aad5f55ae8bcc703e6bf0e929892ac5e69
-- Homepage: 1379577f5a424cf0ee8f733be5be5c5464a0785b
-- Product cards: adaed3f6da1611c774a18814d542b4281a471861
-- Catalogue: 2e05a5da40f6effa2ca922bd6b40ba904651e84d
-- Product-detail actions: 2de684d70611d59c4598704340b104f4585d31a3
-- Product detail: ed3b56f1bde009658ada081d53c28ef3a4cf677e
-- Cart: 5684e4ec2f9dc3e51ea0a6a1d44682cfafa6366b
-- Design system: 4d64a14062e1c752625819115f05352788c2f8d4
-- Redesign implementation record: a91aec3ee24c96054dbda01238b96204ed5fdc4a
+CLOUDFLARE DEPLOYMENT
+---------------------
+Status: FIRST SUCCESSFUL STAGING DEPLOYMENT COMPLETE
 
-CLOUDFLARE DEPLOYMENT CONFIGURATION
------------------------------------
-Status: THREE DEPLOYMENT FAILURES UNDERSTOOD AND FIXED; LATEST REDESIGN DEPLOY VERIFICATION PENDING
-
-Cloudflare Git commands:
+Working configuration:
 - Build command: npm run cf:build
 - Deploy command: npx wrangler deploy
-
-package.json responsibilities:
-- npm run build -> next build
-- npm run cf:build -> opennextjs-cloudflare build
-- npm run cf:deploy -> wrangler deploy
-- npm run preview -> OpenNext build and preview
-- npm run deploy -> OpenNext build and Wrangler deploy
-
-Current wrangler.jsonc:
 - Worker name: gowthamfireworks
 - Main: .open-next/worker.js
 - Assets: .open-next/assets
@@ -248,45 +226,48 @@ Current wrangler.jsonc:
 - No WORKER_SELF_REFERENCE binding
 - No first-deploy R2 cache binding
 
-DEPLOYMENT FAILURE 001 — GENERATED SELF-SERVICE BINDING
--------------------------------------------------------
-Observed:
+Successful deployment:
+- URL: https://gowthamfireworks.karthikraja826.workers.dev
+- Version ID: 8f78e53d-ada2-4db3-8029-c55fdccc20e2
+- Worker startup time: 31 ms
+- Deployment success record: docs/DEPLOYMENT_SUCCESS_001_WORKERS_DEV.md
+- Deployment record commit: 0068ab3baf484a482a7b3c21f31dcd33cc6538e4
+
+Cloudflare build verification:
+- 621 packages installed.
+- npm run cf:build completed.
+- OpenNext invoked next build exactly once.
+- Next.js compiled successfully.
+- TypeScript completed successfully.
+- 21 static/SSG pages generated.
+- .open-next/worker.js created.
+- 37 assets discovered.
+- 19 new or modified assets uploaded.
+- Worker uploaded successfully.
+- Worker triggers deployed successfully.
+- Build and deploy commands completed successfully.
+
+Non-blocking warning:
+- Build/dependency cache upload was skipped because no committed package-manager lockfile was detected.
+- Add a reproducible lockfile later to pin dependency versions and improve build caching.
+
+DEPLOYMENT FAILURE HISTORY
+--------------------------
+
+FAILURE 001 — GENERATED SELF-SERVICE BINDING
 - Cloudflare code 10143.
 - Auto-generated WORKER_SELF_REFERENCE pointed to a Worker that did not exist.
+- Fixed by adding explicit wrangler.jsonc/open-next.config.ts and removing the first-deploy self binding.
 
-Cause:
-- No committed OpenNext/Wrangler configuration during first deploy.
-- Wrangler auto-migration generated a self-service binding.
+FAILURE 002 — RECURSIVE OPENNEXT BUILD
+- Deployment repeated OpenNext build for more than 20 minutes.
+- package build script pointed to OpenNext; OpenNext called it recursively.
+- Fixed by restoring build = next build, adding cf:build and using npm run cf:build in Cloudflare.
 
-Fix:
-- Added explicit wrangler.jsonc and open-next.config.ts.
-- Removed self-service binding for first deployment.
-- Added OpenNext/Wrangler dependencies.
-
-DEPLOYMENT FAILURE 002 — RECURSIVE OPENNEXT BUILD
--------------------------------------------------
-Observed:
-- Deployment ran longer than 20 minutes.
-- Repeated OpenNext build headings and repeated opennextjs-cloudflare build calls.
-
-Cause:
-- package build script pointed to OpenNext.
-- OpenNext invoked package build and recursively invoked itself.
-
-Fix:
-- build restored to next build.
-- cf:build added for OpenNext.
-- Cloudflare Build command set to npm run cf:build.
-
-DEPLOYMENT FAILURE 003 — WORKER NAME AND FUTURE DATE
-----------------------------------------------------
-Observed:
+FAILURE 003 — WORKER NAME AND FUTURE DATE
 - Config name gowtham-fireworks did not match connected Worker gowthamfireworks.
 - Cloudflare code 10021 because compatibility date 2026-07-24 was ahead of Cloudflare UTC.
-
-Fix:
-- Worker name changed to gowthamfireworks.
-- Compatibility date changed to 2026-07-23.
+- Fixed by using Worker name gowthamfireworks and compatibility date 2026-07-23.
 
 ROADMAP — 0% TO 100%
 ---------------------
@@ -295,21 +276,23 @@ PHASE 0 — PROJECT FOUNDATION (0%–5%)
 Status: COMPLETE FOR FIRST SCAFFOLD
 - Repository, tracker, framework, README, environment example and secret rules complete.
 - Cloudflare/OpenNext files committed.
-- Reproducible package-lock workflow still pending.
+- Reproducible package-manager lockfile still pending.
 
 PHASE 1 — REQUIREMENTS, LEGAL FLOW AND ARCHITECTURE (5%–12%)
 Status: SUBSTANTIALLY DOCUMENTED
 - B2C/B2B, profiles, admin routing, test OTP, compliance modes and core journeys complete.
 - Exact licences, transport, service regions and final legal wording remain pending.
 
-PHASE 2 — DESIGN SYSTEM AND UX (12%–24%)
-Status: MODERN SIVAKASI MARKET IMPLEMENTED IN SOURCE
+PHASE 2 — DESIGN SYSTEM AND UX (12%–25%)
+Status: REDESIGN IMPLEMENTED AND STAGING DEPLOYED
 - Public visual reset complete.
 - Homepage, header, footer, catalogue, product cards, product detail and cart redesigned.
-- Build, browser, mobile and accessibility verification pending.
+- Next.js/TypeScript/OpenNext build passed.
+- Cloudflare Worker deployment passed.
+- Browser, mobile and accessibility acceptance still pending.
 - Real logo/product/factory assets pending.
 
-PHASE 3 — DATABASE AND SECURITY FOUNDATION (24%–31%)
+PHASE 3 — DATABASE AND SECURITY FOUNDATION (25%–31%)
 Status: SQL DRAFT COMPLETE; EXECUTION PENDING
 - Schema, RLS, storage and onboarding RPC draft complete.
 - Dedicated-project execution and RLS tests pending.
@@ -330,8 +313,8 @@ Status: STORAGE FOUNDATION CODED
 - Compression, thumbnails, multiple images and private document upload pending.
 
 PHASE 7 — PUBLIC LANDING PAGE (61%–69%)
-Status: REDESIGNED STATIC FOUNDATION COMPLETE
-- Product-led landing structure complete.
+Status: STAGING REDESIGN DEPLOYED ON DEMO DATA
+- Product-led public landing page deployed.
 - Live Supabase content and real assets pending.
 
 PHASE 8 — RETAIL AND WHOLESALE CATALOGUES (69%–78%)
@@ -353,21 +336,19 @@ PHASE 11 — SETTINGS, SEO, NOTIFICATIONS AND ANALYTICS (92%–95%)
 Status: PLANNED
 
 PHASE 12 — TESTING, SECURITY AND PERFORMANCE (95%–98%)
-Status: STARTED
-- Earlier Next.js, TypeScript and OpenNext production build passed.
-- Latest redesign build, browser, Supabase, RLS, OTP, accessibility and security tests remain.
+Status: STARTED EARLY
+- Next.js, TypeScript, OpenNext and Cloudflare staging deployment passed.
+- Browser, Supabase, RLS, OTP, accessibility and security tests remain.
 
 PHASE 13 — DEPLOYMENT AND DOMAIN SWITCH (98%–100%)
-Status: CONNECTED DEPLOYMENT TRIGGERED; VERIFICATION PENDING
-- Cloudflare configuration repaired.
-- Latest redesign pushed to main.
-- Successful Worker build/deploy and route verification pending.
+Status: STAGING WORKER DEPLOYED; PRODUCTION DOMAIN NOT SWITCHED
+- workers.dev staging deployment successful.
+- Custom domain remains unchanged pending visual/data/security acceptance.
 
 BUILD AND CHANGE HISTORY
 ------------------------
 Entry 001 — 0% -> 1%
 - Repository located and permanent tracker created.
-- Commit: 5e972a3021f40d6ab49b9e5318b99e90a1fb6fcc
 
 Entry 002 — 1% -> 2%
 - B2C/B2B, OTP, wholesale approval and compliance architecture.
@@ -382,24 +363,28 @@ Entry 005 — 3% -> 16%
 - Next.js application, responsive design and Supabase schema foundation.
 
 Entry 006 — 16% -> 18%
-- Cloudflare CI verified initial Next.js, TypeScript and OpenNext build.
+- Initial Next.js, TypeScript and OpenNext build verified.
 - Deployment failure 001 diagnosed and fixed.
 
 Entry 007 — remained 18%
-- Recursive OpenNext deployment failure diagnosed and corrected.
+- Recursive OpenNext failure diagnosed and fixed.
 
 Entry 008 — remained 18%
-- Worker name mismatch and future compatibility date diagnosed and corrected.
+- Worker name and future compatibility-date failure diagnosed and fixed.
 
 Entry 009 — remained 18%
 - Senior UI/UX review completed.
-- Initial public design rejected for production.
+- Initial public design rejected.
 - Modern Sivakasi Market redesign approved.
 
 Entry 010 — 18% -> 24%
 - Modern Sivakasi Market redesign implemented across public shopping surfaces.
-- Latest main push triggered connected Cloudflare build.
-- Build/deploy/browser verification still pending.
+
+Entry 011 — 24% -> 25%
+- Redesigned Next.js/OpenNext build passed.
+- First Cloudflare Worker staging deployment succeeded.
+- Worker URL and Version ID recorded.
+- Browser acceptance and Supabase integration are next.
 
 OPEN DECISIONS
 --------------
@@ -415,7 +400,7 @@ OPEN DECISIONS
 
 KNOWN RISKS
 -----------
-- Latest redesign Cloudflare build has not yet been verified.
+- Browser and mobile visual acceptance of the staging Worker is not yet recorded.
 - Real product imagery is not yet supplied; staging uses branded pack mockups.
 - Supabase SQL has not been applied or tested.
 - Admin routes need server-side hardening beyond client role checks.
@@ -423,31 +408,35 @@ KNOWN RISKS
 - Public catalogue still uses demo products.
 - Fireworks sale, possession, transport and online wording require specialist review.
 - Incorrect RLS could expose phone numbers, pricing or documents.
-- Existing live site must remain until staging acceptance.
+- Existing live domain must remain until staging acceptance.
 
 NEXT EXACT STEPS
 ----------------
-1. Confirm Cloudflare builds latest main with npm run cf:build.
-2. Confirm npx wrangler deploy publishes Worker gowthamfireworks.
-3. Capture the workers.dev URL.
-4. Verify /, /catalogue, product detail, /cart, /login, /wholesale and /admin/login.
-5. Perform desktop and mobile visual review.
-6. Fix any build, responsive or accessibility defects.
-7. Supply and integrate real logo, product and factory assets.
-8. Run supabase/schema.sql only in the dedicated Gowtham Fireworks project.
-9. Configure Test OTP numbers and bootstrap owner_admin.
+1. Open https://gowthamfireworks.karthikraja826.workers.dev on desktop and mobile.
+2. Verify /, /catalogue, a product detail, /cart, /login, /wholesale and /admin/login.
+3. Review widths around 360 px, 390 px, 430 px, tablet and desktop.
+4. Record and fix visual, responsive or runtime issues.
+5. Supply and integrate real logo, product and factory images.
+6. Create/connect the dedicated Gowtham Fireworks Supabase project.
+7. Review and run supabase/schema.sql only in that dedicated project.
+8. Configure Supabase Test OTP numbers and bootstrap owner_admin.
+9. Test Personal, Business and Admin flows.
 10. Replace demo catalogue data with live Supabase queries.
+11. Add a reproducible package-manager lockfile for deterministic builds and caching.
+12. Keep the production domain unchanged until staging acceptance.
 
 SESSION HANDOVER
 ----------------
 Date: 24 July 2026
-Progress: 24%
+Progress: 25%
 Branch: main
-Last completed task: Modern Sivakasi Market public redesign implemented and pushed.
+Last completed task: Modern Sivakasi Market redesign successfully built and deployed to Cloudflare Workers staging.
 Database migrations applied: None.
-Build status: Previous foundation build passed; latest redesign build pending Cloudflare verification.
-Deployment status: Connected deployment triggered by latest main commits; final result not yet available through GitHub status.
-Exact next step: Review the newest Cloudflare deployment log and verify the Worker URL.
+Build status: Next.js, TypeScript and OpenNext passed.
+Deployment status: SUCCESS.
+Staging URL: https://gowthamfireworks.karthikraja826.workers.dev
+Cloudflare Version ID: 8f78e53d-ada2-4db3-8029-c55fdccc20e2
+Exact next step: Complete browser/mobile staging acceptance, then connect the dedicated Supabase project and apply the reviewed schema.
 
 END OF PERMANENT PROJECT RECORD
 ===============================
