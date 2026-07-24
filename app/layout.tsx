@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${manrope.variable} ${fraunces.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
         <a className="skip-link" href="#main-content">Skip to main content</a>
         <CartProvider>
           <SiteHeader />
